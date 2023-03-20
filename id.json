@@ -1,0 +1,59 @@
+[
+  {
+    "pck": "com.tencent.mm",
+    "maxVer": 2040,
+    "data": [
+      {
+        "ver": 2020,
+        "ids": {
+          "chat_title": "com.tencent.mm:id/ipt",
+          "home_item": "com.tencent.mm:id/bg1",
+          "main_tab": "com.tencent.mm:id/dub",
+          "common_back": "com.tencent.mm:id/eh",
+          "common_right": "com.tencent.mm:id/d8",
+          "tag_item": "com.tencent.mm:id/h8q",
+          "main_search": "com.tencent.mm:id/fdi",
+          "main_more": "com.tencent.mm:id/fcu",
+          "moments_middle_sign": "com.tencent.mm:id/bev",
+          "moments_publish_scroll": "com.tencent.mm:id/hcs",
+          "like_moments_thumbs": "com.tencent.mm:id/kb",
+          "like_moments_comment": "com.tencent.mm:id/jp"
+        }
+      },
+      {
+        "ver": 2040,
+        "ids": {
+          "chat_title": "com.tencent.mm:id/ipt",
+          "home_item": "com.tencent.mm:id/bg1",
+          "main_tab": "com.tencent.mm:id/dub",
+          "common_back": "com.tencent.mm:id/eh",
+          "common_right": "com.tencent.mm:id/d8",
+          "tag_item": "com.tencent.mm:id/h8q",
+          "main_search": "com.tencent.mm:id/fdi",
+          "main_more": "com.tencent.mm:id/fcu",
+          "moments_middle_sign": "com.tencent.mm:id/bev",
+          "moments_publish_scroll": "com.tencent.mm:id/hcs",
+          "like_moments_thumbs": "com.tencent.mm:id/kb",
+          "like_moments_comment": "com.tencent.mm:id/jp",
+          "video_number_share": "com.tencent.mm:id/hph",
+          "home_list": "com.tencent.mm:id/f67",
+          "contact_list": "com.tencent.mm:id/fjw",
+          "scan_album": "com.tencent.mm:id/hhv"
+        }
+      }
+    ]
+  },
+  {
+    "pck": "com.zhiliaoapp.musically",
+    "maxVer": 2022107060,
+    "data": [
+      {
+        "ver": 2022107060,
+        "ids": {
+          "share_btn": "com.zhiliaoapp.musically:id/dxi",
+          "copy_link": "com.zhiliaoapp.musically:id/dx6"
+        }
+      }
+    ]
+  }
+]
