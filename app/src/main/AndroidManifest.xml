@@ -24,7 +24,7 @@
         <service
             android:name=".AddFriendService"
             android:exported="false"
-            android:label="🔥🔥🔥添加微信好友"
+            android:label="@string/acc_des"
             android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">
             <intent-filter>
                 <action android:name="android.accessibilityservice.AccessibilityService" />

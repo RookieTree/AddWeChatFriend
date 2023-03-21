@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">AddFriend</string>
     <string name="accessibility_desc">添加好友</string>
+    <string name="acc_des">🔥🔥🔥添加微信好友</string>
 </resources>

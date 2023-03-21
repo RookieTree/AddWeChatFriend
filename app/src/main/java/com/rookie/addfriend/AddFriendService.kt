@@ -73,7 +73,6 @@ class AddFriendService : AccessibilityService() {
             return
         }
         logD("event_name:$event")
-        return
         if (event.eventType == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) {
             when (event.className.toString()) {
                 LAUNCHER_UI -> {
