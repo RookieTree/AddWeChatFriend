@@ -148,10 +148,11 @@ class MainActivity : BaseActivity() {
             val file = UriUtils.uri2File(it)
             file?.run {
                 if (ExcelUtils.checkIfExcelFile(file)) {
-                    ExcelUtils.readExcel(file) //读取Excel file 内容
+                    ExcelUtils.readExcelInContact(file) //读取Excel file 内容
                 }
             }
         }
+
         return
     }
 

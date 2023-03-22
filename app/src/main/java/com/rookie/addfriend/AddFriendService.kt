@@ -4,12 +4,9 @@ import android.accessibilityservice.AccessibilityService
 import android.app.Notification
 import android.app.PendingIntent
 import android.content.Intent
-import android.os.Handler
-import android.provider.ContactsContract.CommonDataKinds.Phone
 import android.view.accessibility.AccessibilityEvent
 import cn.coderpig.clearcorpse.*
 import java.lang.Thread.sleep
-import kotlin.math.log
 
 
 /*
@@ -74,7 +71,7 @@ class AddFriendService : AccessibilityService() {
         if (event.eventType == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) {
             when (event.className.toString()) {
                 LAUNCHER_UI -> {
-                    if (PhoneManager.phoneNums.isEmpty()) {
+                    if (PhoneManager.contacts.isEmpty()) {
                         return
                     }
                     event.source?.let { source ->
@@ -85,13 +82,13 @@ class AddFriendService : AccessibilityService() {
                     }
                 }
                 SEARCH_UI -> {
-                    if (PhoneManager.phoneNums.isEmpty()) {
+                    if (PhoneManager.contacts.isEmpty()) {
                         return
                     }
                     event.source?.let { source ->
                         //让搜索框输入
                         val editView = source.getNodeById(HOME_SEARCH_EDIT_ID)
-                        currentUser = PhoneManager.phoneNums.poll()
+                        currentUser = PhoneManager.contacts.poll()
                         currentUser?.let { editView?.input(it.userPhone) }
                         sleep(200)
                         source.getNodeById(HOME_SEARCH_RESULT_ID).click()
@@ -146,7 +143,7 @@ class AddFriendService : AccessibilityService() {
             source.getNodeById(ADD_NAME_ID)?.input("下雨不愁")
             sleep(200)
             source.getNodeById(ADD_SEND_ID).click()
-            hasAddFinish = PhoneManager.phoneNums.isEmpty()
+            hasAddFinish = PhoneManager.contacts.isEmpty()
             repeat(2){
                 back()
                 sleep(200)
@@ -165,7 +162,7 @@ class AddFriendService : AccessibilityService() {
         event.source?.let { source ->
             source.getNodeById(ADD_TXT_ID)?.input("你好呀")
             gestureClick(source.getNodeByText("发送", true)?.parent)
-            hasAddFinish = PhoneManager.phoneNums.isEmpty()
+            hasAddFinish = PhoneManager.contacts.isEmpty()
             repeat(2) {
                 back()
                 sleep(200)
@@ -201,7 +198,7 @@ class AddFriendService : AccessibilityService() {
                 source.getNodeById(ADD_TXT_ID)?.input("你好呀")
                 sleep(200)
                 source.getNodeById(ADD_SEND_ID).click()
-                hasAddFinish = PhoneManager.phoneNums.isEmpty()
+                hasAddFinish = PhoneManager.contacts.isEmpty()
                 repeat(2) {
                     back()
                     sleep(200)

@@ -14,16 +14,16 @@ import java.util.Queue
  */
 object PhoneManager {
 
-    var phoneNums: Queue<ContactUser> = LinkedList()
+    var contacts: Queue<ContactUser> = LinkedList()
 
     //记录是否添加过
     private var phoneMap = mutableMapOf<String, Int>()
 
     fun addPhoneNumber(str: String) {
         val numbers = str.split(" ")
-        phoneNums.clear()
+        contacts.clear()
         for (number in numbers) {
-            phoneNums.add(ContactUser(number))
+            contacts.add(ContactUser(number))
             phoneMap[number] = 0
         }
     }

@@ -1,6 +1,5 @@
 package com.rookie.addfriend
 
-import android.util.Log
 import cn.coderpig.clearcorpse.logD
 import org.apache.poi.hssf.usermodel.HSSFDateUtil
 import org.apache.poi.ss.usermodel.Cell
@@ -49,6 +48,37 @@ object ExcelUtils {
                     val cellInfo = "r:$r; c:$c; v:$value"
                     logD(cellInfo)
                 }
+            }
+        } catch (e: Exception) {
+            /* proper exception handling to be here */
+            logD(e.toString())
+        }
+    }
+
+    @Throws(FileNotFoundException::class)
+    fun readExcelInContact(file: File?) {
+        if (file == null) {
+            logD("读取Excel出错，文件为空文件")
+            return
+        }
+        val stream: InputStream = FileInputStream(file)
+        try {
+            val workbook = XSSFWorkbook(stream)
+            val sheet: XSSFSheet = workbook.getSheetAt(0)
+            val rowsCount: Int = sheet.physicalNumberOfRows
+            val formulaEvaluator: FormulaEvaluator =
+                workbook.creationHelper.createFormulaEvaluator()
+            PhoneManager.contacts.clear()
+            //从第二行开始读
+            for (r in 1 until rowsCount) {
+                val row: Row = sheet.getRow(r)
+                val name = getCellAsString(row, 0, formulaEvaluator)
+                val phone =
+                    getCellAsString(row, 1, formulaEvaluator).replace(".", "").replace("E10", "")
+                val sayHi = getCellAsString(row, 2, formulaEvaluator)
+                //每次读取一行的内容
+                val contactUser = ContactUser(name, phone, sayHi)
+                PhoneManager.contacts.offer(contactUser)
             }
         } catch (e: Exception) {
             /* proper exception handling to be here */
