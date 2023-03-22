@@ -48,8 +48,6 @@ class AddFriendService : AccessibilityService() {
         const val ADD_SCROLLVIEW_ID = "com.tencent.mm:id/j3t"  // 添加二级页-滚动view
     }
 
-    var handler = Handler()
-
     var hasAddFinish: Boolean = false
 
     /**

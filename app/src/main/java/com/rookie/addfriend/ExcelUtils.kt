@@ -29,7 +29,7 @@ object ExcelUtils {
     @Throws(FileNotFoundException::class)
     fun readExcel(file: File?) {
         if (file == null) {
-            Log.e("NullFile", "读取Excel出错，文件为空文件")
+            logD("读取Excel出错，文件为空文件")
             return
         }
         val stream: InputStream = FileInputStream(file)

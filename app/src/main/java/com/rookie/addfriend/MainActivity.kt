@@ -1,21 +1,22 @@
 package com.rookie.addfriend
 
+import android.Manifest
 import android.app.Dialog
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
 import android.provider.Settings
-import android.text.TextUtils
 import android.widget.Button
 import android.widget.EditText
 import androidx.activity.result.ActivityResult
-import androidx.activity.result.ActivityResultCallback
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import cn.coderpig.clearcorpse.isAccessibilitySettingsOn
-import cn.coderpig.clearcorpse.shortToast
-import cn.coderpig.clearcorpse.startApp
+import com.blankj.utilcode.util.UriUtils
 import java.io.File
 
 
@@ -34,6 +35,11 @@ class MainActivity : BaseActivity() {
     private lateinit var btnClear: Button
     private lateinit var etPhones: EditText
     private lateinit var activityResultLauncher: ActivityResultLauncher<Intent>
+
+    companion object {
+        const val READ_EXTERNAL_STORAGE_REQUEST_CODE = 100
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         activityResultLauncher = registerForActivityResult(
@@ -65,10 +71,26 @@ class MainActivity : BaseActivity() {
                 startApp("com.tencent.mm", "com.tencent.mm.ui.LauncherUI", "未安装微信")
 //                startApp("weixin://", "未安装微信")
             }*/
-            openFileSelector()
+            checkReadPermissions()
         }
         btnClear.setOnClickListener {
             etPhones.text.clear()
+        }
+    }
+
+    private fun checkReadPermissions() {
+        if (ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.READ_EXTERNAL_STORAGE
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            ActivityCompat.requestPermissions(
+                this,
+                arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE),
+                READ_EXTERNAL_STORAGE_REQUEST_CODE
+            )
+        } else {
+            openFileSelector()
         }
     }
 
@@ -77,25 +99,17 @@ class MainActivity : BaseActivity() {
         val intent = Intent(Intent.ACTION_GET_CONTENT)
         intent.addCategory(Intent.CATEGORY_OPENABLE)
         intent.type = "*/*"
-//        intent.type = "application/vnd.ms-excel application/x-excel" 未知无效原因
         activityResultLauncher.launch(intent)
     }
 
-    override fun onActivityResult(
+    override fun onRequestPermissionsResult(
         requestCode: Int,
-        resultCode: Int, data: Intent?
+        permissions: Array<out String>,
+        grantResults: IntArray
     ) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (data == null) {
-            // 用户未选择任何文件，直接返回
-            return
-        }
-        val uri: Uri? = data.data // 获取用户选择文件的URI
-        uri?.let {
-            val file = FileUtil.getFilePathByUri(this, it)?.let { it1 -> File(it1) }
-            if (ExcelUtils.checkIfExcelFile(file)) {
-                ExcelUtils.readExcel(file) //读取Excel file 内容
-            }
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == READ_EXTERNAL_STORAGE_REQUEST_CODE && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            openFileSelector()
         }
     }
 
@@ -112,7 +126,8 @@ class MainActivity : BaseActivity() {
     private fun showAccessDialog() {
         if (dialog == null) {
             dialog =
-                AlertDialog.Builder(this).setTitle("请打开<<${this.getString(R.string.acc_des)}>>无障碍服务")
+                AlertDialog.Builder(this)
+                    .setTitle("请打开<<${this.getString(R.string.acc_des)}>>无障碍服务")
                     .setPositiveButton(
                         "确认"
                     ) { dialog, which ->
@@ -130,9 +145,11 @@ class MainActivity : BaseActivity() {
         }
         val uri: Uri? = it.data!!.data // 获取用户选择文件的URI
         uri?.let {
-            val file = FileUtil.getFilePathByUri(this, it)?.let { it1 -> File(it1) }
-            if (ExcelUtils.checkIfExcelFile(file)) {
-                ExcelUtils.readExcel(file) //读取Excel file 内容
+            val file = UriUtils.uri2File(it)
+            file?.run {
+                if (ExcelUtils.checkIfExcelFile(file)) {
+                    ExcelUtils.readExcel(file) //读取Excel file 内容
+                }
             }
         }
         return
