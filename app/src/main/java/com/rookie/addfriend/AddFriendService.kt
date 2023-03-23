@@ -106,11 +106,6 @@ class AddFriendService : AccessibilityService() {
                     addContactSecondPage(event)
                 }
             }
-        } else if (event.eventType == AccessibilityEvent.TYPE_VIEW_CLICKED) {
-            logD("event_click_name:" + event.text)
-//            if (event.text.size == 0) {
-//                return
-//            }
         }
     }
 
@@ -125,7 +120,7 @@ class AddFriendService : AccessibilityService() {
             currentUser!!.userName?.let {
                 source.getNodeById(wxNodeId(ADD_NAME_ID))?.input(it)
             }
-            sleep(1500)
+//            sleep(200)
 //            source.getNodeById(ADD_SEND_ID).click()
 //            gestureClick(source.getNodeByText("发送", true)?.parent)
             hasAddFinish = PhoneManager.contacts.isEmpty()
@@ -138,8 +133,9 @@ class AddFriendService : AccessibilityService() {
 
     private fun addContactFirstPage(event: AccessibilityEvent) {
         event.source?.let { source ->
-//            source.getNodeById(wxNodeId(ADD_CONTACT_BUTTON_ID)).click()
-            gestureClick(source.getNodeByText("添加到通讯录", true)?.parent)
+            sleep(200)
+            source.getNodeById(wxNodeId(ADD_CONTACT_BUTTON_ID)).click()
+//            gestureClick(source.getNodeByText("添加到通讯录", true)?.parent)
         }
     }
 
