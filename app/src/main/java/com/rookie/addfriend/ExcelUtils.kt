@@ -2,10 +2,7 @@ package com.rookie.addfriend
 
 import cn.coderpig.clearcorpse.logD
 import org.apache.poi.hssf.usermodel.HSSFDateUtil
-import org.apache.poi.ss.usermodel.Cell
-import org.apache.poi.ss.usermodel.CellValue
-import org.apache.poi.ss.usermodel.FormulaEvaluator
-import org.apache.poi.ss.usermodel.Row
+import org.apache.poi.ss.usermodel.*
 import org.apache.poi.xssf.usermodel.XSSFSheet
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
 import java.io.File
@@ -44,7 +41,7 @@ object ExcelUtils {
                 //每次读取一行的内容
                 for (c in 0 until cellsCount) {
                     //将每一格子的内容转换为字符串形式
-                    val value = getCellAsString(row, c, formulaEvaluator)
+                    val value = getCellAsString(row, c)
                     val cellInfo = "r:$r; c:$c; v:$value"
                     logD(cellInfo)
                 }
@@ -66,19 +63,27 @@ object ExcelUtils {
             val workbook = XSSFWorkbook(stream)
             val sheet: XSSFSheet = workbook.getSheetAt(0)
             val rowsCount: Int = sheet.physicalNumberOfRows
-            val formulaEvaluator: FormulaEvaluator =
-                workbook.creationHelper.createFormulaEvaluator()
+//            val formulaEvaluator: FormulaEvaluator =
+//                workbook.creationHelper.createFormulaEvaluator()
             PhoneManager.contacts.clear()
+            PhoneManager.contactList.clear()
+            val row0 = sheet.getRow(0)
+            val name = getCellAsString(row0, 0)
+            val phone =
+                getCellAsString(row0, 1)
+            val sayHi = getCellAsString(row0, 2)
+            PhoneManager.contactList.add(ContactUser(phone, name, sayHi))
             //从第二行开始读
             for (r in 1 until rowsCount) {
                 val row: Row = sheet.getRow(r)
-                val name = getCellAsString(row, 0, formulaEvaluator)
+                val name = getCellAsString(row, 0)
                 val phone =
-                    getCellAsString(row, 1, formulaEvaluator).replace(".", "").replace("E10", "")
-                val sayHi = getCellAsString(row, 2, formulaEvaluator)
+                    getCellAsString(row, 1)
+                val sayHi = getCellAsString(row, 2)
                 //每次读取一行的内容
-                val contactUser = ContactUser(name, phone, sayHi)
+                val contactUser = ContactUser(phone, name, sayHi)
                 PhoneManager.contacts.offer(contactUser)
+                PhoneManager.contactList.add(contactUser)
             }
         } catch (e: Exception) {
             /* proper exception handling to be here */
@@ -93,26 +98,11 @@ object ExcelUtils {
      * @param formulaEvaluator
      * @return
      */
-    private fun getCellAsString(row: Row, c: Int, formulaEvaluator: FormulaEvaluator): String {
+    private fun getCellAsString(row: Row, c: Int): String {
         var value = ""
         try {
             val cell = row.getCell(c)
-            val cellValue: CellValue = formulaEvaluator.evaluate(cell)
-            when (cellValue.getCellType()) {
-                Cell.CELL_TYPE_BOOLEAN -> value = "" + cellValue.getBooleanValue()
-                Cell.CELL_TYPE_NUMERIC -> {
-                    val numericValue: Double = cellValue.getNumberValue()
-                    value = if (HSSFDateUtil.isCellDateFormatted(cell)) {
-                        val date: Double = cellValue.getNumberValue()
-                        val formatter = SimpleDateFormat("dd/MM/yy")
-                        formatter.format(HSSFDateUtil.getJavaDate(date))
-                    } else {
-                        "" + numericValue
-                    }
-                }
-                Cell.CELL_TYPE_STRING -> value = "" + cellValue.getStringValue()
-                else -> {}
-            }
+            value = DataFormatter().formatCellValue(cell)
         } catch (e: NullPointerException) {
             /* proper error handling should be here */
             logD(e.toString())

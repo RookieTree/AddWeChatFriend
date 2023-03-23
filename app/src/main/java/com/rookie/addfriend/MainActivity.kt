@@ -15,7 +15,12 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import cn.coderpig.clearcorpse.isAccessibilitySettingsOn
+import cn.coderpig.clearcorpse.logD
+import cn.coderpig.clearcorpse.shortToast
+import cn.coderpig.clearcorpse.startApp
 import com.blankj.utilcode.util.UriUtils
 import java.io.File
 
@@ -32,9 +37,11 @@ class MainActivity : BaseActivity() {
     override fun getLayoutID(): Int = R.layout.activity_main
 
     private lateinit var btnAdd: Button
-    private lateinit var btnClear: Button
-    private lateinit var etPhones: EditText
+    private lateinit var btnRead: Button
+    private lateinit var rv: RecyclerView
     private lateinit var activityResultLauncher: ActivityResultLauncher<Intent>
+    var dialog: Dialog? = null
+    var contactAdapter: ContactAdapter? = null
 
     companion object {
         const val READ_EXTERNAL_STORAGE_REQUEST_CODE = 100
@@ -52,29 +59,25 @@ class MainActivity : BaseActivity() {
     }
 
     override fun init() {
-        etPhones = findViewById(R.id.et_phone)
+        btnRead = findViewById(R.id.btn_read)
         btnAdd = findViewById(R.id.btn_add)
-        btnClear = findViewById(R.id.btn_clear)
+        rv = findViewById(R.id.rv)
+        rv.layoutManager = LinearLayoutManager(this)
+        contactAdapter = ContactAdapter()
+        rv.adapter = contactAdapter
+        btnRead.setOnClickListener {
+            checkReadPermissions()
+        }
         btnAdd.setOnClickListener {
-            /*val phones = etPhones.text.toString()
-            if (TextUtils.isEmpty(phones)) {
-//                shortToast("请输入手机号")
-//                return@setOnClickListener
-//                PhoneManager.addPhoneNumber("15112378930")
-                PhoneManager.addPhoneNumber("17343371792")
-            } else {
-                PhoneManager.addPhoneNumber(phones)
-            }*/
-            /*if (!isAccessibilitySettingsOn(AddFriendService::class.java)) {
+            if (PhoneManager.contacts.isEmpty()) {
+                shortToast("清先读取本地excel文件")
+                return@setOnClickListener
+            }
+            if (!isAccessibilitySettingsOn(AddFriendService::class.java)) {
                 showAccessDialog()
             } else {
                 startApp("com.tencent.mm", "com.tencent.mm.ui.LauncherUI", "未安装微信")
-//                startApp("weixin://", "未安装微信")
-            }*/
-            checkReadPermissions()
-        }
-        btnClear.setOnClickListener {
-            etPhones.text.clear()
+            }
         }
     }
 
@@ -113,12 +116,9 @@ class MainActivity : BaseActivity() {
         }
     }
 
-    var dialog: Dialog? = null
     override fun onResume() {
         super.onResume()
-        if (!isAccessibilitySettingsOn(AddFriendService::class.java)) {
-            showAccessDialog()
-        } else {
+        if (isAccessibilitySettingsOn(AddFriendService::class.java)) {
             dialog?.dismiss()
         }
     }
@@ -135,7 +135,7 @@ class MainActivity : BaseActivity() {
                         startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
                     }.create()
         }
-//        dialog!!.show()
+        dialog!!.show()
     }
 
     private fun dealSelectFile(it: ActivityResult) {
@@ -149,11 +149,10 @@ class MainActivity : BaseActivity() {
             file?.run {
                 if (ExcelUtils.checkIfExcelFile(file)) {
                     ExcelUtils.readExcelInContact(file) //读取Excel file 内容
+                    contactAdapter?.setNewInstance(PhoneManager.contactList)
                 }
             }
         }
-
-        return
     }
 
 }
