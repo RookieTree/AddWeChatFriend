@@ -14,14 +14,6 @@ import java.util.Queue
  */
 object PhoneManager {
 
-    var contacts: Queue<ContactUser> = LinkedList()
     var contactList: MutableList<ContactUser> = mutableListOf()
 
-    fun addPhoneNumber(str: String) {
-        val numbers = str.split(" ")
-        contacts.clear()
-        for (number in numbers) {
-            contacts.add(ContactUser(number))
-        }
-    }
 }

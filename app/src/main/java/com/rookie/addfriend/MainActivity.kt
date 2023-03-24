@@ -69,7 +69,7 @@ class MainActivity : BaseActivity() {
             checkReadPermissions()
         }
         btnAdd.setOnClickListener {
-            if (PhoneManager.contacts.isEmpty()) {
+            if (PhoneManager.contactList.isEmpty()) {
                 shortToast("清先读取本地excel文件")
                 return@setOnClickListener
             }

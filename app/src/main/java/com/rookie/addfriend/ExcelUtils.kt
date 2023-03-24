@@ -65,7 +65,6 @@ object ExcelUtils {
             val rowsCount: Int = sheet.physicalNumberOfRows
 //            val formulaEvaluator: FormulaEvaluator =
 //                workbook.creationHelper.createFormulaEvaluator()
-            PhoneManager.contacts.clear()
             PhoneManager.contactList.clear()
             val row0 = sheet.getRow(0)
             val name = getCellAsString(row0, 0)
@@ -82,7 +81,6 @@ object ExcelUtils {
                 val sayHi = getCellAsString(row, 2)
                 //每次读取一行的内容
                 val contactUser = ContactUser(phone, name, sayHi)
-                PhoneManager.contacts.offer(contactUser)
                 PhoneManager.contactList.add(contactUser)
             }
         } catch (e: Exception) {

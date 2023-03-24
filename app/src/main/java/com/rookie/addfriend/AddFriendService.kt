@@ -2,9 +2,15 @@ package com.rookie.addfriend
 
 import android.accessibilityservice.AccessibilityService
 import android.app.Notification
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.app.PendingIntent
+import android.app.PendingIntent.FLAG_IMMUTABLE
+import android.content.Context
 import android.content.Intent
+import android.os.Build
 import android.view.accessibility.AccessibilityEvent
+import androidx.core.app.NotificationCompat
 import cn.coderpig.clearcorpse.*
 import java.lang.Thread.sleep
 
@@ -45,6 +51,12 @@ class AddFriendService : AccessibilityService() {
 
     var hasAddFinish: Boolean = false
 
+    override fun onCreate() {
+        super.onCreate()
+        // 创建Notification渠道，并开启前台服务
+        createForegroundNotification()?.let { startForeground(1, it) }
+    }
+
     /**
      * 服务链接的回调
      */
@@ -56,7 +68,8 @@ class AddFriendService : AccessibilityService() {
         return super.onStartCommand(intent, flags, startId)
     }
 
-    var currentUser: ContactUser? = null
+    private var currentUser: ContactUser? = null
+    var currentIndex: Int = 1
 
     /**
      * 监听窗口变化的回调
@@ -69,7 +82,7 @@ class AddFriendService : AccessibilityService() {
         if (event.eventType == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) {
             when (event.className.toString()) {
                 LAUNCHER_UI -> {
-                    if (PhoneManager.contacts.isEmpty()) {
+                    if (PhoneManager.contactList.isEmpty()) {
                         return
                     }
                     event.source?.let { source ->
@@ -80,16 +93,17 @@ class AddFriendService : AccessibilityService() {
                     }
                 }
                 SEARCH_UI -> {
-                    if (PhoneManager.contacts.isEmpty()) {
+                    if (PhoneManager.contactList.isEmpty()) {
                         return
                     }
                     event.source?.let { source ->
                         //让搜索框输入
                         val editView = source.getNodeById(wxNodeId(HOME_SEARCH_EDIT_ID))
-                        currentUser = PhoneManager.contacts.poll()
+                        currentUser = PhoneManager.contactList[currentIndex]
                         currentUser?.let { editView?.input(it.userPhone) }
                         sleep(200)
-                        source.getNodeById(wxNodeId(HOME_SEARCH_RESULT_ID)).click()
+//                        source.getNodeById(wxNodeId(HOME_SEARCH_RESULT_ID)).click()
+                        gestureClick(source.getNodeById(wxNodeId(HOME_SEARCH_RESULT_ID)))
                     }
                 }
                 CONTACT_USER_UI -> {
@@ -113,17 +127,19 @@ class AddFriendService : AccessibilityService() {
         if (currentUser == null) {
             return
         }
+        currentIndex++
+        hasAddFinish = (currentIndex >= PhoneManager.contactList.size)
         event.source?.let { source ->
+            sleep(200)
             currentUser!!.helloWord?.let {
                 source.getNodeById(wxNodeId(ADD_SAYHI_ID))?.input(it)
             }
             currentUser!!.userName?.let {
                 source.getNodeById(wxNodeId(ADD_NAME_ID))?.input(it)
             }
-//            sleep(200)
+            sleep(200)
 //            source.getNodeById(ADD_SEND_ID).click()
-//            gestureClick(source.getNodeByText("发送", true)?.parent)
-            hasAddFinish = PhoneManager.contacts.isEmpty()
+            gestureClick(source.getNodeByText("发送", true)?.parent)
             repeat(2) {
                 back()
                 sleep(200)
@@ -134,8 +150,8 @@ class AddFriendService : AccessibilityService() {
     private fun addContactFirstPage(event: AccessibilityEvent) {
         event.source?.let { source ->
             sleep(200)
-            source.getNodeById(wxNodeId(ADD_CONTACT_BUTTON_ID)).click()
-//            gestureClick(source.getNodeByText("添加到通讯录", true)?.parent)
+//            source.getNodeById(wxNodeId(ADD_CONTACT_BUTTON_ID)).click()
+            gestureClick(source.getNodeByText("添加到通讯录", true)?.parent)
         }
     }
 
@@ -150,6 +166,44 @@ class AddFriendService : AccessibilityService() {
      */
     override fun onUnbind(intent: Intent?): Boolean {
         return super.onUnbind(intent)
+    }
+
+    private fun createForegroundNotification(): Notification? {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val notificationManager =
+                getSystemService(Context.NOTIFICATION_SERVICE) as? NotificationManager
+            // 创建通知渠道，一定要写在创建显示通知之前，创建通知渠道的代码只有在第一次执行才会创建
+            // 以后每次执行创建代码检测到该渠道已存在，因此不会重复创建
+            val channelId = "addfriend"
+            notificationManager?.createNotificationChannel(
+                NotificationChannel(
+                    channelId,
+                    "添加好友",
+                    NotificationManager.IMPORTANCE_HIGH // 发送通知的等级，此处为高
+                )
+            )
+            return NotificationCompat.Builder(this, channelId)
+                // 设置点击notification跳转，比如跳转到设置页
+                .setContentIntent(
+                    PendingIntent.getActivity(
+                        this,
+                        0,
+                        Intent(this, MainActivity::class.java),
+                        FLAG_IMMUTABLE
+                    )
+                )
+                .setSmallIcon(R.drawable.ic_app) // 设置小图标
+                .setContentTitle(getString(R.string.acc_des))
+                .setContentText("添加好友")
+                .setTicker("添加好友")
+                .build()
+        }
+        return null
+    }
+
+    override fun onDestroy() {
+        stopForeground(true)
+        super.onDestroy()
     }
 
 }
