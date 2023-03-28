@@ -2,13 +2,18 @@ package com.rookie.addfriend
 
 import android.Manifest
 import android.app.Dialog
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.PixelFormat
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
+import android.view.LayoutInflater
+import android.view.WindowManager
 import android.widget.Button
-import android.widget.EditText
+import android.widget.TextView
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
@@ -17,12 +22,9 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import cn.coderpig.clearcorpse.isAccessibilitySettingsOn
-import cn.coderpig.clearcorpse.logD
-import cn.coderpig.clearcorpse.shortToast
-import cn.coderpig.clearcorpse.startApp
+import com.blankj.utilcode.util.PermissionUtils
+import com.blankj.utilcode.util.PermissionUtils.SimpleCallback
 import com.blankj.utilcode.util.UriUtils
-import java.io.File
 
 
 /*
@@ -76,22 +78,30 @@ class MainActivity : BaseActivity() {
             if (!isAccessibilitySettingsOn(AddFriendService::class.java)) {
                 showAccessDialog()
             } else {
-                startApp("com.tencent.mm", "com.tencent.mm.ui.LauncherUI", "未安装微信")
+                PhoneManager.resetIndex()
+                startWeChat()
             }
         }
     }
 
+    private fun startWeChat() {
+        startApp("com.tencent.mm", "com.tencent.mm.ui.LauncherUI", "未安装微信")
+    }
+
     private fun checkReadPermissions() {
-        if (ContextCompat.checkSelfPermission(
-                this,
-                Manifest.permission.READ_EXTERNAL_STORAGE
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
-            ActivityCompat.requestPermissions(
-                this,
-                arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE),
-                READ_EXTERNAL_STORAGE_REQUEST_CODE
-            )
+        if (PermissionUtils.isGranted(Manifest.permission.READ_EXTERNAL_STORAGE)) {
+            PermissionUtils.permission(Manifest.permission.READ_EXTERNAL_STORAGE)
+                .callback(object : SimpleCallback {
+                    override fun onGranted() {
+                        openFileSelector()
+                    }
+
+                    override fun onDenied() {
+
+                    }
+
+                })
+                .request()
         } else {
             openFileSelector()
         }
@@ -154,5 +164,4 @@ class MainActivity : BaseActivity() {
             }
         }
     }
-
 }

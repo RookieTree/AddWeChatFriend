@@ -14,6 +14,25 @@ import java.util.Queue
  */
 object PhoneManager {
 
+    var currentIndex: Int = 1
+
     var contactList: MutableList<ContactUser> = mutableListOf()
+
+    val hasAddFinish: Boolean
+        get() {
+            return currentIndex >= contactList.size
+        }
+
+    fun resetIndex() {
+        currentIndex = 1
+    }
+
+    fun getCurrentUser(): ContactUser? {
+        return if (currentIndex < contactList.size) {
+            contactList[currentIndex]
+        } else {
+            null
+        }
+    }
 
 }

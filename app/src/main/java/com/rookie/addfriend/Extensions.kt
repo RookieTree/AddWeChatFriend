@@ -1,27 +1,26 @@
-package cn.coderpig.clearcorpse
+package com.rookie.addfriend
 
 import android.accessibilityservice.AccessibilityService
 import android.accessibilityservice.AccessibilityService.GLOBAL_ACTION_BACK
 import android.accessibilityservice.AccessibilityService.GLOBAL_ACTION_RECENTS
 import android.accessibilityservice.GestureDescription
 import android.annotation.SuppressLint
+import android.app.ActivityManager
 import android.content.*
+import android.database.Cursor
 import android.graphics.Path
 import android.graphics.Rect
 import android.graphics.drawable.Drawable
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
-import android.provider.DocumentsContract
-import android.provider.MediaStore
 import android.provider.Settings
 import android.text.TextUtils
+import android.text.TextUtils.SimpleStringSplitter
 import android.util.Log
-import android.view.View
-import android.view.ViewGroup
-import android.view.accessibility.AccessibilityEvent
+import android.view.accessibility.AccessibilityManager
 import android.view.accessibility.AccessibilityNodeInfo
 import android.widget.Toast
-import java.io.File
 
 
 /**
@@ -189,7 +188,7 @@ fun AccessibilityNodeInfo.getNodeByText(
                 }
             }
             sleep(100)
-            logD("查找组件，第${count + 1}次找不到")
+            logD("查找组件，text:$text,第${count + 1}次找不到")
             count++
         }
     }
@@ -342,3 +341,78 @@ fun AccessibilityNodeInfo?.fullPrintNode(
 
 const val WX_PKG_NAME = "com.tencent.mm"
 fun wxNodeId(id: String) = "$WX_PKG_NAME:id/$id"
+
+fun AccessibilityService.refreshTask() {
+    recentTask()
+    back()
+}
+
+@Throws(RuntimeException::class)
+fun Context.isAccessibilityEnabled(): Boolean {
+    // 检查AccessibilityService是否开启
+    val am = getSystemService(Context.ACCESSIBILITY_SERVICE) as AccessibilityManager
+    val isAccessibilityEnabled_flag = am.isEnabled
+    var isExploreByTouchEnabled_flag = false
+
+    // 检查无障碍服务是否以语音播报的方式开启
+    isExploreByTouchEnabled_flag = isScreenReaderActive(this)
+    return isAccessibilityEnabled_flag && isExploreByTouchEnabled_flag
+}
+
+private const val SCREEN_READER_INTENT_ACTION = "android.accessibilityservice.AccessibilityService"
+private const val SCREEN_READER_INTENT_CATEGORY =
+    "android.accessibilityservice.category.FEEDBACK_SPOKEN"
+
+private fun isScreenReaderActive(context: Context): Boolean {
+
+    // 通过Intent方式判断是否存在以语音播报方式提供服务的Service，还需要判断开启状态
+    val screenReaderIntent = Intent(SCREEN_READER_INTENT_ACTION)
+    screenReaderIntent.addCategory(SCREEN_READER_INTENT_CATEGORY)
+    val screenReaders = context.packageManager.queryIntentServices(screenReaderIntent, 0)
+    // 如果没有，返回false
+    if (screenReaders == null || screenReaders.size <= 0) {
+        return false
+    }
+    var hasActiveScreenReader = false
+    if (Build.VERSION.SDK_INT >= 26) {
+        // 高版本可以直接判断服务是否处于开启状态
+        for (screenReader in screenReaders) {
+            hasActiveScreenReader = hasActiveScreenReader or isAccessibilitySettingsOn(
+                context,
+                screenReader.serviceInfo.packageName + "/" + screenReader.serviceInfo.name
+            )
+        }
+    } else {
+        // 判断正在运行的Service里有没有上述存在的Service
+        val runningServices: MutableList<String> = ArrayList()
+        val manager = context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+        for (service in manager.getRunningServices(Int.MAX_VALUE)) {
+            runningServices.add(service.service.packageName)
+        }
+        for (screenReader in screenReaders) {
+            if (runningServices.contains(screenReader.serviceInfo.packageName)) {
+                hasActiveScreenReader = hasActiveScreenReader or true
+            }
+        }
+    }
+    return hasActiveScreenReader
+}
+
+// To check if service is enabled
+private fun isAccessibilitySettingsOn(context: Context, service: String): Boolean {
+    val mStringColonSplitter = SimpleStringSplitter(':')
+    val settingValue = Settings.Secure.getString(
+        context.applicationContext.contentResolver,
+        Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES
+    )
+    if (settingValue != null) {
+        mStringColonSplitter.setString(settingValue)
+        while (mStringColonSplitter.hasNext()) {
+            val accessibilityService = mStringColonSplitter.next()
+            if (accessibilityService.equals(service, ignoreCase = true)) {
+                return true
+            }
+        }
+    }
+    return false
+}

@@ -1,7 +1,5 @@
 package com.rookie.addfriend
 
-import cn.coderpig.clearcorpse.logD
-import org.apache.poi.hssf.usermodel.HSSFDateUtil
 import org.apache.poi.ss.usermodel.*
 import org.apache.poi.xssf.usermodel.XSSFSheet
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
@@ -9,7 +7,6 @@ import java.io.File
 import java.io.FileInputStream
 import java.io.FileNotFoundException
 import java.io.InputStream
-import java.text.SimpleDateFormat
 
 /**
  * @description: Excel 工具类
@@ -63,8 +60,6 @@ object ExcelUtils {
             val workbook = XSSFWorkbook(stream)
             val sheet: XSSFSheet = workbook.getSheetAt(0)
             val rowsCount: Int = sheet.physicalNumberOfRows
-//            val formulaEvaluator: FormulaEvaluator =
-//                workbook.creationHelper.createFormulaEvaluator()
             PhoneManager.contactList.clear()
             val row0 = sheet.getRow(0)
             val name = getCellAsString(row0, 0)
