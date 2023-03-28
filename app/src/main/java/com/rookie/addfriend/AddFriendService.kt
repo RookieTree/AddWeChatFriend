@@ -153,7 +153,7 @@ class AddFriendService : AccessibilityService() {
             sleep(200)
             sendView.click()
             PhoneManager.currentIndex++
-            gestureClick(source.getNodeByText("发送", true)?.parent)
+//            gestureClick(source.getNodeByText("发送", true)?.parent)
             repeat(2) {
                 back()
                 sleep(200)
