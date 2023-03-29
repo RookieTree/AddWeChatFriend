@@ -89,7 +89,7 @@ class MainActivity : BaseActivity() {
     }
 
     private fun checkReadPermissions() {
-        if (PermissionUtils.isGranted(Manifest.permission.READ_EXTERNAL_STORAGE)) {
+        if (!PermissionUtils.isGranted(Manifest.permission.READ_EXTERNAL_STORAGE)) {
             PermissionUtils.permission(Manifest.permission.READ_EXTERNAL_STORAGE)
                 .callback(object : SimpleCallback {
                     override fun onGranted() {
@@ -111,7 +111,9 @@ class MainActivity : BaseActivity() {
     private fun openFileSelector() {
         val intent = Intent(Intent.ACTION_GET_CONTENT)
         intent.addCategory(Intent.CATEGORY_OPENABLE)
-        intent.type = "*/*"
+//        intent.type = "*/*"
+        intent.type = "application/vnd.ms-excel"
+        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);//授予临时权限别忘
         activityResultLauncher.launch(intent)
     }
 

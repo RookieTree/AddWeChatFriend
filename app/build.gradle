@@ -5,12 +5,13 @@ plugins {
 
 android {
     namespace 'com.rookie.addfriend'
-    compileSdk 33
+    compileSdk 31
 
     defaultConfig {
         applicationId "com.rookie.addfriend"
         minSdk 24
-        targetSdk 33
+        //noinspection ExpiredTargetSdkVersion
+        targetSdk 31
         versionCode 1
         versionName "1.0"
 

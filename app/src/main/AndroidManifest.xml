@@ -3,7 +3,13 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+    <uses-permission
+        android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+        tools:ignore="ScopedStorage" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
+    <!-- 安卓11额外权限 -->
+    <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE"
+        tools:ignore="ScopedStorage" />
 
     <application
         android:allowBackup="true"
@@ -11,7 +17,9 @@
         android:label="@string/app_name"
         android:name=".AddFriendApp"
         android:supportsRtl="true"
-        android:theme="@style/Theme.AddFriend">
+        android:theme="@style/Theme.AddFriend"
+        android:preserveLegacyExternalStorage="true"
+        android:requestLegacyExternalStorage="true">
 
         <activity android:name=".MainActivity"
             android:launchMode="singleTask"
