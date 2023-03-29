@@ -64,6 +64,14 @@ android {
     kotlinOptions {
         jvmTarget = '1.8'
     }
+
+    android.applicationVariants.all { variant ->
+//        variant.outputs.all {
+//            variant.getPackageApplication().outputDirectory = new File(project.rootDir.absolutePath+"/${variant.name}/")
+//        }
+        //重命名APK的名字
+        variant.outputs[0].outputFileName = "添加朋友_${variant.versionName}_${variant.name}.apk"
+    }
 }
 
 dependencies {
