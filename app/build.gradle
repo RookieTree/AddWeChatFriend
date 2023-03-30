@@ -43,6 +43,7 @@ android {
             signingConfig signingConfigs.myConfig //签名
             minifyEnabled true //发布到市场需要混淆
             zipAlignEnabled true
+            consumerProguardFiles 'proguard-rules.pro'
         }
 
         debug {

@@ -19,3 +19,9 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
+-keep public class com.fasterxml**{*;}
+-keep class org.apache**{*;}
+-keep class org.codehaus**{*;}
+-keep class org.etsi**{*;}
+-keep class org.openxmlformats**{*;}
+-keep class schemaorg_apache_xmlbeans**{*;}
