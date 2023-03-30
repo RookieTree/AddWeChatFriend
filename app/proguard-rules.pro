@@ -128,4 +128,5 @@
 -keep class com.microsoft.schemas.vml.impl.CTTextboxImpl { *; }
 -keep class com.microsoft.schemas.office.excel.impl.CTClientDataImpl { *; }
 -keep class com.microsoft.schemas.office.excel.impl.STTrueFalseBlankImpl { *; }
+-keep class aavax.xml.stream { *; }
 -dontwarn
