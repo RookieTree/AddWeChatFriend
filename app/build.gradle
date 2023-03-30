@@ -110,6 +110,27 @@ task upgradeVersion {
     }
 }
 
+task packageReleaseMapping {
+    dependsOn("assembleRelease")
+    doLast {
+        uploadMappingToBuglyServer()//上传mapping文件到bugly
+    }
+}
+
+private def uploadMappingToBuglyServer() {
+    def apkDir = "${project.buildDir}/outputs/mapping/release/mapping.txt"
+//    def appVersion = "${ext.versionNameMajor}" + "." + "${ext.versionNameMinor}" + "." + "${ext.versionNameLast}"
+    def versionProps = new Properties()
+    def versionPropsFile = rootProject.file('version.properties')
+    if (versionPropsFile.exists()) {
+        versionProps.load(new FileInputStream(versionPropsFile))
+    }
+    exec {
+        executable = 'java'
+        args = ['-jar', '../buglyqq-upload-symbol.jar', '-appid', '2413a969d1', '-appkey', '4d50d612-8d94-41b6-84d4-94922e49baa7', '-bundleid', 'com.rookie.addfriend', '-platform', 'Android', '-version', versionProps['versionName'], '-inputMapping', apkDir]
+    }
+}
+
 void cmdExecute(String cmd) {
     println "\n执行$cmd"
     println cmd.execute().text
