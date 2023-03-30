@@ -31,20 +31,11 @@ android {
     }
 
     buildTypes {
-        publish {
+        release {
             //正式环境、无日志、不可调试、已混淆
             debuggable false
             signingConfig signingConfigs.myConfig //签名
             minifyEnabled true //发布到市场需要混淆
-            zipAlignEnabled true
-        }
-
-        release {
-            //正式环境、有日志、可调试、未混淆
-            debuggable true
-            //可以调试运行程序（jni）
-            signingConfig signingConfigs.myConfig //签名
-            minifyEnabled false
             zipAlignEnabled true
         }
 
@@ -65,13 +56,13 @@ android {
         jvmTarget = '1.8'
     }
 
-    android.applicationVariants.all { variant ->
-//        variant.outputs.all {
-//            variant.getPackageApplication().outputDirectory = new File(project.rootDir.absolutePath+"/${variant.name}/")
-//        }
-        //重命名APK的名字
-        variant.outputs[0].outputFileName = "添加朋友_${variant.versionName}_${variant.name}.apk"
-    }
+//    android.applicationVariants.all { variant ->
+////        variant.outputs.all {
+////            variant.getPackageApplication().outputDirectory = new File(project.rootDir.absolutePath+"/${variant.name}/")
+////        }
+//        //重命名APK的名字
+//        variant.outputs[0].outputFileName = "添加朋友_${variant.versionName}_${variant.name}.apk"
+//    }
 }
 
 dependencies {
