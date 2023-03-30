@@ -114,7 +114,7 @@ class MainActivity : BaseActivity() {
         intent.type = "*/*"
 //        intent.type = "application/vnd.ms-excel"
         intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);//授予临时权限别忘
-        activityResultLauncher.launch(intent)
+        activityResultLauncher.launch(Intent.createChooser(intent, "选择文件"))
     }
 
     override fun onRequestPermissionsResult(

@@ -1,6 +1,8 @@
 package com.rookie.addfriend
 
 import android.app.Application
+import com.chad.library.BuildConfig
+import com.tencent.bugly.crashreport.CrashReport
 
 
 /*
@@ -9,7 +11,16 @@ import android.app.Application
  *  @文件名:   AddFriendApp
  *  @创建者:   rookietree
  *  @创建时间:  2023/3/17 15:18
- *  @描述：    TODO
+ *  @描述：
  */
 class AddFriendApp:Application() {
+
+    override fun onCreate() {
+        super.onCreate()
+        CrashReport.initCrashReport(
+            applicationContext,
+            Constants.BUGLY_APP_ID,
+            BuildConfig.DEBUG
+        )
+    }
 }
