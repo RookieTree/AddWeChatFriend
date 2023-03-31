@@ -34,6 +34,8 @@ jobs:
       # You may pin to the exact commit or the version.
       # uses: alexellis/upload-assets@259de5111cb56966d046ced998941e93f91d2c93
       uses: alexellis/upload-assets@0.4.0
+      env:
+        GITHUB_TOKEN: ${{ secrets.TOKEN }}
       with:
         # The paths to the assets you want to upload as a JSON array. You can use a glob pattern.
         asset_paths: ${{ github.workspace }}/app/build/outputs/apk/debug/app-debug.apk
