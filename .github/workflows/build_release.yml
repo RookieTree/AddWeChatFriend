@@ -7,6 +7,8 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
     - uses: actions/checkout@v3
     - name: set up JDK 11
@@ -19,7 +21,7 @@ jobs:
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
     - name: Build apk with Gradle
-      run: ./gradlew clean && ./gradlew app:assembleDebug
+      run: ./gradlew clean && ./gradlew app:assembleRelease
 
     - name: Upload a Build Artifact
       uses: actions/upload-artifact@v3.1.2
@@ -27,19 +29,34 @@ jobs:
         # Artifact name
         name: 添加朋友
         # A file, directory or wildcard pattern that describes what to upload
-        path: ${{ github.workspace }}/app/build/outputs/apk/debug/app-debug.apk
+        path: ${{ github.workspace }}/app/build/outputs/apk/release/app-release.apk
         # The desired behavior if no files are found using the provided path.
 
-    - name: Upload Release Assets
-      # You may pin to the exact commit or the version.
-      # uses: alexellis/upload-assets@259de5111cb56966d046ced998941e93f91d2c93
-      uses: alexellis/upload-assets@0.4.0
+      # 创建realease
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@v1
       env:
         GITHUB_TOKEN: ${{ secrets.TOKEN }}
       with:
-        # The paths to the assets you want to upload as a JSON array. You can use a glob pattern.
-        asset_paths: ${{ github.workspace }}/app/build/outputs/apk/debug/app-debug.apk
+        tag_name: ${{ github.ref }}
+        release_name: Release ${{ github.ref }}
+        draft: false
+        prerelease: false
+      # 上传apk到release
+    - name: Upload Release Asset
+      id: upload-release-asset
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.TOKEN }}
+      with:
+        # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`.
+        # See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: app/build/outputs/apk/release/app-release.apk
+        asset_name: 添加朋友.apk
+        asset_content_type: application/vnd.android.package-archiv
 
     - name: Upload File to Pgyer
-      run: curl -F 'file=@${{ github.workspace }}/app/build/outputs/apk/debug/app-debug.apk' -F "_api_key=${{ secrets.PGYER_API_KEY }}" -F "uKey=${{ secrets.PGYER_USER_KEY }}" -F "buildInstallType=3" https://www.pgyer.com/apiv2/app/upload
+      run: curl -F 'file=@${{ github.workspace }}/app/build/outputs/apk/release/app-release.apk' -F "_api_key=${{ secrets.PGYER_API_KEY }}" -F "uKey=${{ secrets.PGYER_USER_KEY }}" -F "buildInstallType=3" https://www.pgyer.com/apiv2/app/upload
 
