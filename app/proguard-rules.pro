@@ -184,3 +184,5 @@
 -keep class com.apache.poi.** { *; }
 -keep class schemaorg_apache_xmlbeans.* {*;}
 
+-keep class aavax.xml.stream.* {*;}
+
