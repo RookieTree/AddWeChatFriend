@@ -60,7 +60,11 @@ jobs:
 #        asset_content_type: application/vnd.android.package-archiv
       #上传到蒲公英
     - name: Upload File to Pgyer
-      run: curl -F 'file=@${{ github.workspace }}/app/build/outputs/apk/release/app-release.apk' -F "_api_key=${{ secrets.PGYER_API_KEY }}" -F "uKey=${{ secrets.PGYER_USER_KEY }}" -F "buildInstallType=3" https://www.pgyer.com/apiv2/app/upload
+#      run: curl -F 'file=@${{ github.workspace }}/app/build/outputs/apk/release/app-release.apk' -F "_api_key=${{ secrets.PGYER_API_KEY }}" -F "uKey=${{ secrets.PGYER_USER_KEY }}" -F "buildInstallType=3" https://www.pgyer.com/apiv2/app/upload
+      uses: PGYER/pgyer-upload-app-action@v1.3
+        with:
+          _api_key: ${{ secrets.PGYER_API_KEY }}
+          appFilePath: ${{ github.workspace }}/app/build/outputs/apk/release/app-release.apk
       #存档apk
     - name: Upload a Build Artifact
       uses: actions/upload-artifact@v3.1.2
