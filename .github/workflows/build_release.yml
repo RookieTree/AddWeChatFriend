@@ -23,20 +23,24 @@ jobs:
     - name: Build apk with Gradle
       run: ./gradlew clean && ./gradlew app:assembleRelease
 
-    - name: Upload a Build Artifact
-      uses: actions/upload-artifact@v3.1.2
-      with:
-        # Artifact name
-        name: 添加朋友
-        # A file, directory or wildcard pattern that describes what to upload
-        path: ${{ github.workspace }}/app/build/outputs/apk/release/app-release.apk
-
-      # 创建realease
+    # 创建release
     - name: Create Release
       id: create_release
-      uses: ncipollo/release-action@v1.12.0
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.TOKEN }}
+        #GitHub 会自动创建 GITHUB_TOKEN 密码以在工作流程中使用。
+        #您可以使用 GITHUB_TOKEN 在工作流程运行中进行身份验证。
+        #当您启用 GitHub Actions 时，GitHub 在您的仓库中安装 GitHub 应用程序。
+        #GITHUB_TOKEN 密码是一种 GitHub 应用程序 安装访问令牌。
+        #您可以使用安装访问令牌代表仓库中安装的 GitHub 应用程序 进行身份验证。
+        #令牌的权限仅限于包含您的工作流程的仓库。 更多信息请参阅“GITHUB_TOKEN 的权限”。
+        #在每个作业开始之前， GitHub 将为作业提取安装访问令牌。 令牌在作业完成后过期。
       with:
-        token: ${{ secrets.TOKEN }}
+        tag_name: ${{ github.ref }}
+        release_name: Release ${{ github.ref }}
+        draft: false
+        prerelease: false
       # 上传apk到release
     - name: Upload Release Asset
       id: upload-release-asset
@@ -44,13 +48,19 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.TOKEN }}
       with:
-        # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`.
-        # See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps
-        upload_url: ${{ steps.create_release.upload_url }}
-        asset_path: app/build/outputs/apk/release/app-release.apk
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ${{ github.workspace }}/app/build/outputs/apk/release/app-release.apk
         asset_name: 添加朋友.apk
         asset_content_type: application/vnd.android.package-archiv
       #上传到蒲公英
     - name: Upload File to Pgyer
       run: curl -F 'file=@${{ github.workspace }}/app/build/outputs/apk/release/app-release.apk' -F "_api_key=${{ secrets.PGYER_API_KEY }}" -F "uKey=${{ secrets.PGYER_USER_KEY }}" -F "buildInstallType=3" https://www.pgyer.com/apiv2/app/upload
+      #存档apk
+    - name: Upload a Build Artifact
+      uses: actions/upload-artifact@v3.1.2
+      with:
+        # Artifact name
+        name: build
+        # A file, directory or wildcard pattern that describes what to upload
+        path: ${{ github.workspace }}/app/build/outputs #将打包之后的文件全部上传（里面会有混淆的map文件）
 
