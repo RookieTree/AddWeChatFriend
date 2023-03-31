@@ -1,10 +1,33 @@
-# https://github.com/centic9/poi-on-android/blob/master/poitest/proguard-rules.pro
--keep class org.apache.poi.** { *; }
--keep class org.apache.xmlbeans.** { *; }
--keep class schemaorg_apache_xmlbeans.system.*.TypeSystemHolder { public final static *** typeSystem; }
+-dontwarn org.apache.**
+-dontwarn org.openxmlformats.schemas.**
+-dontwarn org.etsi.**
+-dontwarn org.w3.**
+-dontwarn com.microsoft.schemas.**
+-dontwarn com.graphbuilder.**
+-dontnote org.apache.**
+-dontnote org.openxmlformats.schemas.**
+-dontnote org.etsi.**
+-dontnote org.w3.**
+-dontnote com.microsoft.schemas.**
+-dontnote com.graphbuilder.**
+
+-keeppackagenames org.apache.poi.ss.formula.function
+
 -keep class com.fasterxml.aalto.stax.InputFactoryImpl
 -keep class com.fasterxml.aalto.stax.OutputFactoryImpl
 -keep class com.fasterxml.aalto.stax.EventFactoryImpl
+
+-keep class schemaorg_apache_xmlbeans.system.sF1327CCA741569E70F9CA8C9AF9B44B2.TypeSystemHolder { public final static *** typeSystem; }
+
+-keep class org.apache.xmlbeans.impl.schema.BuiltinSchemaTypeSystem { public static *** get(...); public static *** getNoType(...); }
+-keep class org.apache.xmlbeans.impl.schema.PathResourceLoader { public (...); }
+-keep class org.apache.xmlbeans.impl.schema.SchemaTypeSystemCompiler { public static *** compile(...); }
+-keep class org.apache.xmlbeans.impl.schema.SchemaTypeSystemImpl { public (...); public static *** get(...); public static *** getNoType(...); }
+-keep class org.apache.xmlbeans.impl.schema.SchemaTypeLoaderImpl { public static *** getContextTypeLoader(...); public static *** build(...); }
+-keep class org.apache.xmlbeans.impl.store.Locale { public static *** streamToNode(...); public static *** nodeTo*(...); }
+-keep class org.apache.xmlbeans.impl.store.Path { public static *** compilePath(...); }
+-keep class org.apache.xmlbeans.impl.store.Query { public static *** compileQuery(...); }
+
 -keep class org.openxmlformats.schemas.spreadsheetml.x2006.main.CommentsDocument { *; }
 -keep class org.openxmlformats.schemas.spreadsheetml.x2006.main.CTAuthors { *; }
 -keep class org.openxmlformats.schemas.spreadsheetml.x2006.main.CTBooleanProperty { *; }
@@ -59,6 +82,7 @@
 -keep class org.openxmlformats.schemas.spreadsheetml.x2006.main.STCellType$Enum { *; }
 -keep class org.openxmlformats.schemas.spreadsheetml.x2006.main.STCellFormulaType$Enum { *; }
 -keep class org.openxmlformats.schemas.spreadsheetml.x2006.main.STXstring { *; }
+
 -keep class org.openxmlformats.schemas.spreadsheetml.x2006.main.impl.CommentsDocumentImpl { *; }
 -keep class org.openxmlformats.schemas.spreadsheetml.x2006.main.impl.CTAuthorsImpl { *; }
 -keep class org.openxmlformats.schemas.spreadsheetml.x2006.main.impl.CTBooleanPropertyImpl { *; }
@@ -111,6 +135,7 @@
 -keep class org.openxmlformats.schemas.spreadsheetml.x2006.main.impl.SstDocumentImpl { *; }
 -keep class org.openxmlformats.schemas.spreadsheetml.x2006.main.impl.StyleSheetDocumentImpl { *; }
 -keep class org.openxmlformats.schemas.spreadsheetml.x2006.main.impl.STXstringImpl { *; }
+
 -keep class org.openxmlformats.schemas.officeDocument.x2006.customProperties.impl.CTPropertiesImpl { *; }
 -keep class org.openxmlformats.schemas.officeDocument.x2006.customProperties.impl.PropertiesDocumentImpl { *; }
 -keep class org.openxmlformats.schemas.officeDocument.x2006.extendedProperties.impl.CTPropertiesImpl { *; }
@@ -123,10 +148,39 @@
 -keep class com.microsoft.schemas.vml.impl.CTFillImpl { *; }
 -keep class com.microsoft.schemas.vml.impl.CTPathImpl { *; }
 -keep class com.microsoft.schemas.vml.impl.CTShapeImpl { *; }
--keep class com.microsoft.schemas.vml.impl.CTShapetypeImpl { *; }
--keep class com.microsoft.schemas.vml.impl.CTStrokeImpl { *; }
--keep class com.microsoft.schemas.vml.impl.CTTextboxImpl { *; }
--keep class com.microsoft.schemas.office.excel.impl.CTClientDataImpl { *; }
--keep class com.microsoft.schemas.office.excel.impl.STTrueFalseBlankImpl { *; }
--keep class aavax.xml.stream { *; }
--dontwarn
+-keep class com.microsoft.schemas.vml.impl.CTShapetypeImpl { **; }
+-keep class com.microsoft.schemas.vml.impl.CTStrokeImpl { **; }
+-keep class com.microsoft.schemas.vml.impl.CTTextboxImpl { **; }
+-keep class com.microsoft.schemas.office.excel.impl.CTClientDataImpl { **; }
+-keep class com.microsoft.schemas.office.excel.impl.STTrueFalseBlankImpl { **; }
+-keep class org.apache.poi.** { **; }
+-keep class org.apache.xmlbeans.** { **; }
+-keep class org.apache.commons.collections4.** { **; }
+-keep class org.openxmlformats.schemas.** { *; }
+
+-keep class com.opencsv.** { *; }
+-dontwarn com.opencsv.*
+
+-keep class org.apache.** {*;}
+-dontwarn org.apache.**
+
+-keep class com.microsoft.schemas.** {*;}
+-dontwarn com.microsoft.schemas.**
+
+-keep class org.openxmlformats.schemas.spreadsheetml.** {*;}
+-dontwarn org.openxmlformats.schemas.**
+
+-dontwarn com.squareup.picasso.**
+-keep class com.squareup.picasso.** { *; }
+
+-keepattributes InnerClasses
+-dontoptimize
+
+-keep class org.** { *; }
+-keep class com.bea.xml.stream.**{*;}
+-keep class org.apache.xmlbeans.** { *; }
+-keep class com.microsoft.* { *; }
+-keep class org.openxmlformats.**{*;}
+-keep class com.apache.poi.** { *; }
+-keep class schemaorg_apache_xmlbeans.* {*;}
+
