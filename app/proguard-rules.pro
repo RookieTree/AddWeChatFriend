@@ -1,3 +1,31 @@
+
+
+#指定代码的压缩级别
+-optimizationpasses 5
+
+#包明不混合大小写
+-dontusemixedcaseclassnames
+
+#不去忽略非公共的库类
+-dontskipnonpubliclibraryclasses
+
+ #优化  不优化输入的类文件
+-dontoptimize
+
+ #预校验
+-dontpreverify
+
+ #混淆时是否记录日志
+-verbose
+
+#保护注解
+-keepattributes *Annotation*
+
+# 混淆时所采用的算法
+-optimizations !code/simplification/arithmetic,!field/*,!class/merging/*
+
+-mergeinterfacesaggressively
+
 -dontwarn org.apache.**
 -dontwarn org.openxmlformats.schemas.**
 -dontwarn org.etsi.**
@@ -148,41 +176,20 @@
 -keep class com.microsoft.schemas.vml.impl.CTFillImpl { *; }
 -keep class com.microsoft.schemas.vml.impl.CTPathImpl { *; }
 -keep class com.microsoft.schemas.vml.impl.CTShapeImpl { *; }
--keep class com.microsoft.schemas.vml.impl.CTShapetypeImpl { **; }
--keep class com.microsoft.schemas.vml.impl.CTStrokeImpl { **; }
--keep class com.microsoft.schemas.vml.impl.CTTextboxImpl { **; }
--keep class com.microsoft.schemas.office.excel.impl.CTClientDataImpl { **; }
--keep class com.microsoft.schemas.office.excel.impl.STTrueFalseBlankImpl { **; }
--keep class org.apache.poi.** { **; }
--keep class org.apache.xmlbeans.** { **; }
--keep class org.apache.commons.collections4.** { **; }
--keep class org.openxmlformats.schemas.** { *; }
+-keep class com.microsoft.schemas.vml.impl.CTShapetypeImpl { ; }
+-keep class com.microsoft.schemas.vml.impl.CTStrokeImpl { ; }
+-keep class com.microsoft.schemas.vml.impl.CTTextboxImpl { ; }
+-keep class com.microsoft.schemas.office.excel.impl.CTClientDataImpl { ; }
+-keep class com.microsoft.schemas.office.excel.impl.STTrueFalseBlankImpl { ; }
+-keep class org.apache.poi. { ; }
+-keep class org.apache.xmlbeans. { ; }
+-keep class org.apache.commons.collections4. { ; }
+-keep class org.openxmlformats.schemas. { *; }
 
--keep class com.opencsv.** { *; }
--dontwarn com.opencsv.*
-
--keep class org.apache.** {*;}
--dontwarn org.apache.**
-
--keep class com.microsoft.schemas.** {*;}
--dontwarn com.microsoft.schemas.**
-
--keep class org.openxmlformats.schemas.spreadsheetml.** {*;}
--dontwarn org.openxmlformats.schemas.**
-
--dontwarn com.squareup.picasso.**
--keep class com.squareup.picasso.** { *; }
-
--keepattributes InnerClasses
--dontoptimize
-
--keep class org.** { *; }
--keep class com.bea.xml.stream.**{*;}
--keep class org.apache.xmlbeans.** { *; }
--keep class com.microsoft.* { *; }
--keep class org.openxmlformats.**{*;}
--keep class com.apache.poi.** { *; }
+-keep class org.** { ; }
+-keep class com.bea.xml.stream.**{;}
+-keep class org.apache.xmlbeans.** { ; }
+-keep class com.microsoft.* { ; }
+-keep class org.openxmlformats.**{;}
+-keep class com.apache.poi.** { ; }
 -keep class schemaorg_apache_xmlbeans.* {*;}
-
--keep class aavax.xml.stream.* {*;}
-
