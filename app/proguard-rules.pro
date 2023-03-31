@@ -176,20 +176,28 @@
 -keep class com.microsoft.schemas.vml.impl.CTFillImpl { *; }
 -keep class com.microsoft.schemas.vml.impl.CTPathImpl { *; }
 -keep class com.microsoft.schemas.vml.impl.CTShapeImpl { *; }
--keep class com.microsoft.schemas.vml.impl.CTShapetypeImpl { ; }
--keep class com.microsoft.schemas.vml.impl.CTStrokeImpl { ; }
--keep class com.microsoft.schemas.vml.impl.CTTextboxImpl { ; }
--keep class com.microsoft.schemas.office.excel.impl.CTClientDataImpl { ; }
--keep class com.microsoft.schemas.office.excel.impl.STTrueFalseBlankImpl { ; }
--keep class org.apache.poi. { ; }
--keep class org.apache.xmlbeans. { ; }
--keep class org.apache.commons.collections4. { ; }
--keep class org.openxmlformats.schemas. { *; }
+-keep class com.microsoft.schemas.vml.impl.CTShapetypeImpl { *; }
+-keep class com.microsoft.schemas.vml.impl.CTStrokeImpl { *; }
+-keep class com.microsoft.schemas.vml.impl.CTTextboxImpl { *; }
+-keep class com.microsoft.schemas.office.excel.impl.CTClientDataImpl { *; }
+-keep class com.microsoft.schemas.office.excel.impl.STTrueFalseBlankImpl { *; }
+-keep class org.apache.poi.* { *; }
+-keep class org.apache.xmlbeans.* { *; }
+-keep class org.apache.commons.collections4.* { *; }
+-keep class org.openxmlformats.schemas.* { *; }
 
--keep class org.** { ; }
--keep class com.bea.xml.stream.**{;}
--keep class org.apache.xmlbeans.** { ; }
--keep class com.microsoft.* { ; }
--keep class org.openxmlformats.**{;}
--keep class com.apache.poi.** { ; }
--keep class schemaorg_apache_xmlbeans.* {*;}
+-keep class org.** { *; }
+-keep class com.bea.xml.stream.**{*;}
+-keep class com.wutka.dtd.**{*;}
+-keep class aavax.xml.** { *; }
+-keep class repackage.** { *; }
+
+-keep class org.apache.xmlbeans.** { *; }
+-keep class com.microsoft.** { *; }
+-keep class org.openxmlformats.**{*;}
+-keep class com.apache.poi.** { *; }
+-keep class schemaorg_apache_xmlbeans.** {*;}
+-keep class schemaorgMicrosoftComOfficeExcel.** {*;}
+-keep class schemaorgMicrosoftComOfficeOffice.** {*;}
+-keep class schemaorgMicrosoftComVml.** {*;}
+
