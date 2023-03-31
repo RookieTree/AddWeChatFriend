@@ -44,14 +44,20 @@ jobs:
       # 上传apk到release
     - name: Upload Release Asset
       id: upload-release-asset
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.TOKEN }}
+      uses: shogo82148/actions-upload-release-asset@v1
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
         asset_path: ${{ github.workspace }}/app/build/outputs/apk/release/app-release.apk
-        asset_name: 添加朋友.apk
         asset_content_type: application/vnd.android.package-archiv
+#      id: upload-release-asset
+#      uses: actions/upload-release-asset@v1
+#      env:
+#        GITHUB_TOKEN: ${{ secrets.TOKEN }}
+#      with:
+#        upload_url: ${{ steps.create_release.outputs.upload_url }}
+#        asset_path: ${{ github.workspace }}/app/build/outputs/apk/release/app-release.apk
+#        asset_name: 添加朋友.apk
+#        asset_content_type: application/vnd.android.package-archiv
       #上传到蒲公英
     - name: Upload File to Pgyer
       run: curl -F 'file=@${{ github.workspace }}/app/build/outputs/apk/release/app-release.apk' -F "_api_key=${{ secrets.PGYER_API_KEY }}" -F "uKey=${{ secrets.PGYER_USER_KEY }}" -F "buildInstallType=3" https://www.pgyer.com/apiv2/app/upload
