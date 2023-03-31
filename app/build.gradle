@@ -120,7 +120,6 @@ task packageReleaseMapping {
 
 private def uploadMappingToBuglyServer() {
     def apkDir = "${project.buildDir}/outputs/mapping/release/mapping.txt"
-//    def appVersion = "${ext.versionNameMajor}" + "." + "${ext.versionNameMinor}" + "." + "${ext.versionNameLast}"
     def versionProps = new Properties()
     def versionPropsFile = rootProject.file('version.properties')
     if (versionPropsFile.exists()) {
