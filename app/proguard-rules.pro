@@ -41,6 +41,8 @@
 
 -keeppackagenames org.apache.poi.ss.formula.function
 
+-keepattributes *Annotation*,InnerClasses,Signature,EnclosingMethod # 避免混淆注解、内部类、泛型、匿名类
+
 -keep class com.fasterxml.aalto.stax.InputFactoryImpl
 -keep class com.fasterxml.aalto.stax.OutputFactoryImpl
 -keep class com.fasterxml.aalto.stax.EventFactoryImpl
@@ -186,11 +188,13 @@
 -keep class org.apache.commons.collections4.* { *; }
 -keep class org.openxmlformats.schemas.* { *; }
 
--keep class org.** { *; }
--keep class com.bea.xml.stream.**{*;}
--keep class com.wutka.dtd.**{*;}
--keep class aavax.xml.** { *; }
--keep class repackage.** { *; }
+-keep class org** { *; }
+-keep class com.bea.xml.stream** {*;}
+-keep class com.wutka.dtd** {*;}
+-keep class aavax.xml** { *; }
+-keep class aavax.xml**
+-keep class repackage** { *; }
+-keep class repackage** { *; }
 
 -keep class org.apache.xmlbeans.** { *; }
 -keep class com.microsoft.** { *; }
