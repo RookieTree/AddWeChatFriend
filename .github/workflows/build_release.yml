@@ -54,7 +54,8 @@ jobs:
     - uses: ncipollo/release-action@v1
       id: create_release
       with:
-        artifacts: "*.apk"
+#        artifacts: "*.apk"
+        bodyFile: ${{ github.workspace }}/app/build/outputs/apk/release/app-release.apk
         token: ${{ secrets.GITHUB_TOKEN }}
         generateReleaseNotes: true
      # 上传apk到release
