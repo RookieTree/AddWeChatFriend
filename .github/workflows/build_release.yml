@@ -26,7 +26,7 @@ jobs:
     # 创建release
     - name: Create Release
       id: create_release
-      uses: actions/create-release@v1
+      uses: actions/create-release@v3
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         #GitHub 会自动创建 GITHUB_TOKEN 密码以在工作流程中使用。
@@ -44,7 +44,7 @@ jobs:
       # 上传apk到release
     - name: Upload Release Asset
       id: upload-release-asset
-      uses: actions/upload-release-asset@v1
+      uses: actions/upload-release-asset@v3
       env:
         GITHUB_TOKEN: ${{ secrets.TOKEN }}
       with:
