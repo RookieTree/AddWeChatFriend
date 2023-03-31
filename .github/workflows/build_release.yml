@@ -51,11 +51,10 @@ jobs:
 #        asset_name: 添加朋友.apk
 #        asset_content_type: application/vnd.android.package-archiv
       # 创建release
-    - uses: ncipollo/release-action@v1
+    - uses: softprops/action-gh-release@v1
       id: create_release
       with:
-#        artifacts: "*.apk"
-        bodyFile: ${{ github.workspace }}/app/build/outputs/apk/release/app-release.apk
+        files: ${{ github.workspace }}/app/build/outputs/apk/release/app-release.apk
         token: ${{ secrets.GITHUB_TOKEN }}
         generateReleaseNotes: true
      # 上传apk到release
