@@ -43,7 +43,8 @@ android {
             signingConfig signingConfigs.myConfig //签名
             minifyEnabled true //发布到市场需要混淆
             zipAlignEnabled true
-            consumerProguardFiles 'proguard-rules.pro'
+//            consumerProguardFiles 'proguard-rules.pro'
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
 
         debug {
