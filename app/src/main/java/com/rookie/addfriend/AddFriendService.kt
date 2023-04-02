@@ -52,6 +52,8 @@ class AddFriendService : AccessibilityService() {
         //单次加好友最多次数
         const val ADD_COUNT_MAX = 1
         const val ADD_MSG_CODE = 100
+        //添加朋友频率
+        const val ADD_TIMES = 1000 * 60L
     }
 
     //是否开始添加好友
@@ -68,13 +70,11 @@ class AddFriendService : AccessibilityService() {
             if (msg.what == ADD_MSG_CODE) {
                 addFriendService.isStartAdd = true
                 addFriendService.addCount = 0
+                addFriendService.recentTask()
+                sleep(200)
+                addFriendService.back()
                 //一分钟后继续添加
-                sendEmptyMessageDelayed(ADD_MSG_CODE,1000 * 60)
-                postDelayed({
-                    addFriendService.recentTask()
-                    sleep(200)
-                    addFriendService.back()
-                },1000*60)
+                sendEmptyMessageDelayed(ADD_MSG_CODE,ADD_TIMES)
             }
         }
 
@@ -87,7 +87,8 @@ class AddFriendService : AccessibilityService() {
         // 创建Notification渠道，并开启前台服务
         createForegroundNotification()?.let { startForeground(1, it) }
         scheduleHandler = ScheduleHandler(Looper.myLooper()!!, this)
-        scheduleHandler?.sendEmptyMessage(ADD_MSG_CODE)
+        scheduleHandler?.sendEmptyMessageDelayed(ADD_MSG_CODE, ADD_TIMES)
+        isStartAdd = true
     }
 
     /**
