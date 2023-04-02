@@ -10,12 +10,16 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.PixelFormat
 import android.os.Build
+import android.os.Handler
+import android.os.Looper
+import android.os.Message
 import android.view.LayoutInflater
 import android.view.WindowManager
 import android.view.accessibility.AccessibilityEvent
 import android.widget.TextView
 import androidx.core.app.NotificationCompat
 import com.blankj.utilcode.util.ProcessUtils
+import java.lang.ref.WeakReference
 
 
 /*
@@ -34,8 +38,6 @@ class AddFriendService : AccessibilityService() {
         const val CONTACT_USER_UI = "com.tencent.mm.plugin.profile.ui.ContactInfoUI"  // 添加一级页
         const val ADD_CONTACT_USER_UI =
             "com.tencent.mm.plugin.profile.ui.SayHiWithSnsPermissionUI"  // 添加页二级页
-        const val ADD_CONTACT_USER_SECOND_UI =
-            "android.widget.LinearLayout"  // 存在ui id找不到
 
         const val HOME_SEARCH_ICON_ID = "gsl"  // 首页-搜索框图标
         const val HOME_CHAT_TAB_ID = "kd_"  // 首页-微信tab
@@ -46,12 +48,41 @@ class AddFriendService : AccessibilityService() {
         const val ADD_SAYHI_ID = "j0w"  // 申请消息
         const val ADD_NAME_ID = "j0z"  // 备注edit
         const val ADD_SEND_ID = "e9q"  // 添加二级页-发送按钮
+
+        //单次加好友最多次数
+        const val ADD_COUNT_MAX = 1
+        const val ADD_MSG_CODE = 100
     }
+
+    //是否开始添加好友
+    var isStartAdd = false
+
+    //添加好友的次数
+    var addCount = 0
+
+    class ScheduleHandler constructor(looper: Looper, addFriendService: AddFriendService) :
+        Handler(looper) {
+        private val weakReference = WeakReference(addFriendService)
+        override fun handleMessage(msg: Message) {
+            val addFriendService = weakReference.get() ?: return
+            if (msg.what == ADD_MSG_CODE) {
+                addFriendService.isStartAdd = true
+                addFriendService.addCount = 0
+                //一分钟后继续添加
+                sendEmptyMessageDelayed(ADD_MSG_CODE, 1000 * 60)
+            }
+        }
+
+    }
+
+    var scheduleHandler: ScheduleHandler? = null
 
     override fun onCreate() {
         super.onCreate()
         // 创建Notification渠道，并开启前台服务
         createForegroundNotification()?.let { startForeground(1, it) }
+        scheduleHandler = ScheduleHandler(Looper.myLooper()!!, this)
+        scheduleHandler?.sendEmptyMessage(ADD_MSG_CODE)
     }
 
     /**
@@ -69,7 +100,12 @@ class AddFriendService : AccessibilityService() {
      * 监听窗口变化的回调
      */
     override fun onAccessibilityEvent(event: AccessibilityEvent?) {
-        if (event == null || event.packageName != "com.tencent.mm") {
+        if (event == null || !isStartAdd) {
+            return
+        }
+        //如果大于单次添加最大值，就停止
+        if (addCount >= ADD_COUNT_MAX) {
+            isStartAdd = false
             return
         }
         logD("event_name:$event")
@@ -88,12 +124,6 @@ class AddFriendService : AccessibilityService() {
                 ADD_CONTACT_USER_UI -> {
                     addContactSecondPage(event)
                 }
-//                ADD_CONTACT_USER_SECOND_UI -> {
-//                    if (hasStepIntoAddFirst) {
-//                        refreshTask()
-//                        hasStepIntoAddFirst = false
-//                    }
-//                }
             }
         }
     }
@@ -153,6 +183,7 @@ class AddFriendService : AccessibilityService() {
             sleep(200)
             sendView.click()
             PhoneManager.currentIndex++
+            addCount++
 //            gestureClick(source.getNodeByText("发送", true)?.parent)
             repeat(2) {
                 back()

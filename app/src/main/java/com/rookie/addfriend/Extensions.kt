@@ -108,6 +108,7 @@ fun logD(content: String) {
 fun Context.startApp(packageName: String, activityName: String, errorTips: String) {
     try {
         startActivity(Intent(Intent.ACTION_VIEW).apply {
+            addCategory(Intent.CATEGORY_LAUNCHER)
             component = ComponentName(packageName, activityName)
             flags = Intent.FLAG_ACTIVITY_NEW_TASK
         })
