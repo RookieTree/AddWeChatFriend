@@ -69,7 +69,12 @@ class AddFriendService : AccessibilityService() {
                 addFriendService.isStartAdd = true
                 addFriendService.addCount = 0
                 //一分钟后继续添加
-                sendEmptyMessageDelayed(ADD_MSG_CODE, 1000 * 60)
+                sendEmptyMessageDelayed(ADD_MSG_CODE,1000 * 60)
+                postDelayed({
+                    addFriendService.recentTask()
+                    sleep(200)
+                    addFriendService.back()
+                },1000*60)
             }
         }
 
