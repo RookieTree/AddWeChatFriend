@@ -73,9 +73,7 @@ class AddFriendService : AccessibilityService() {
                 addFriendService.isStartAdd = true
                 addFriendService.addCount = 0
                 addFriendService.currEvent?.let {
-                    addFriendService.recentTask()
-                    sleep(200)
-                    addFriendService.back()
+                    addFriendService.searchPhone(it)
                 }
                 //一分钟后继续添加
                 sendEmptyMessageDelayed(ADD_MSG_CODE,ADD_TIMES)
