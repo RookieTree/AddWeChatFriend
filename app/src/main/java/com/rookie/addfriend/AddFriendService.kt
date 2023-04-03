@@ -62,6 +62,8 @@ class AddFriendService : AccessibilityService() {
     //添加好友的次数
     var addCount = 0
 
+    var currEvent:AccessibilityEvent?=null
+
     class ScheduleHandler constructor(looper: Looper, addFriendService: AddFriendService) :
         Handler(looper) {
         private val weakReference = WeakReference(addFriendService)
@@ -70,9 +72,11 @@ class AddFriendService : AccessibilityService() {
             if (msg.what == ADD_MSG_CODE) {
                 addFriendService.isStartAdd = true
                 addFriendService.addCount = 0
-                addFriendService.recentTask()
-                sleep(200)
-                addFriendService.back()
+                addFriendService.currEvent?.let {
+                    addFriendService.recentTask()
+                    sleep(200)
+                    addFriendService.back()
+                }
                 //一分钟后继续添加
                 sendEmptyMessageDelayed(ADD_MSG_CODE,ADD_TIMES)
             }
@@ -109,6 +113,7 @@ class AddFriendService : AccessibilityService() {
         if (event == null || !isStartAdd) {
             return
         }
+        currEvent = event
         //如果大于单次添加最大值，就停止
         if (addCount >= ADD_COUNT_MAX) {
             isStartAdd = false
