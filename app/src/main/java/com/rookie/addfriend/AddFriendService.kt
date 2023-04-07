@@ -13,12 +13,11 @@ import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import android.os.Message
-import android.view.LayoutInflater
+import android.view.Gravity
+import android.view.View
 import android.view.WindowManager
 import android.view.accessibility.AccessibilityEvent
-import android.widget.TextView
 import androidx.core.app.NotificationCompat
-import com.blankj.utilcode.util.ProcessUtils
 import java.lang.ref.WeakReference
 
 
@@ -53,7 +52,7 @@ class AddFriendService : AccessibilityService() {
         const val ADD_COUNT_MAX = 1
         const val ADD_MSG_CODE = 100
         //添加朋友频率
-        const val ADD_TIMES = 1000 * 60L
+        const val ADD_TIMES = 1000 * 30L
     }
 
     //是否开始添加好友
@@ -64,17 +63,24 @@ class AddFriendService : AccessibilityService() {
 
     var currEvent:AccessibilityEvent?=null
 
+    var mWindowManager:WindowManager?=null
+    var overlayView:View?=null
+
     class ScheduleHandler constructor(looper: Looper, addFriendService: AddFriendService) :
         Handler(looper) {
         private val weakReference = WeakReference(addFriendService)
         override fun handleMessage(msg: Message) {
             val addFriendService = weakReference.get() ?: return
+            logD("ScheduleHandler service listening:$addFriendService")
             if (msg.what == ADD_MSG_CODE) {
                 addFriendService.isStartAdd = true
                 addFriendService.addCount = 0
-                addFriendService.currEvent?.let {
-                    addFriendService.searchPhone(it)
-                }
+                addFriendService.recentTask()
+                sleep(200)
+                addFriendService.back()
+//                addFriendService.currEvent?.let {
+//                    addFriendService.searchPhone(it)
+//                }
                 //一分钟后继续添加
                 sendEmptyMessageDelayed(ADD_MSG_CODE,ADD_TIMES)
             }
@@ -91,13 +97,21 @@ class AddFriendService : AccessibilityService() {
         scheduleHandler = ScheduleHandler(Looper.myLooper()!!, this)
         scheduleHandler?.sendEmptyMessageDelayed(ADD_MSG_CODE, ADD_TIMES)
         isStartAdd = true
-    }
-
-    /**
-     * 服务链接的回调
-     */
-    override fun onServiceConnected() {
-        super.onServiceConnected()
+        if (mWindowManager==null){
+            // 获取 WindowManager
+            mWindowManager = getSystemService(WINDOW_SERVICE) as WindowManager
+            // 创建一个悬浮窗口 View
+            overlayView = View.inflate(this,R.layout.float_app_view,null)
+        }
+        // 设置悬浮窗口参数
+        val params = WindowManager.LayoutParams(
+            WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
+            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
+            PixelFormat.TRANSLUCENT
+        )
+        params.gravity = Gravity.BOTTOM
+        // 将悬浮窗口 View 添加到 WindowManager 中
+        mWindowManager?.addView(overlayView, params)
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -135,6 +149,10 @@ class AddFriendService : AccessibilityService() {
                 }
             }
         }
+    }
+
+    override fun onInterrupt() {
+
     }
 
     private fun gotoSearch(event: AccessibilityEvent) {
@@ -178,11 +196,6 @@ class AddFriendService : AccessibilityService() {
             val sayHiView = source.getNodeById(wxNodeId(ADD_SAYHI_ID))
             val nameView = source.getNodeById(wxNodeId(ADD_NAME_ID))
             val sendView = source.getNodeById(wxNodeId(ADD_SEND_ID))
-            logD("sayHiView:$sayHiView")
-//            if (sayHiView == null || nameView == null || sendView == null) {
-//                refreshTask()
-//                return
-//            }
             PhoneManager.getCurrentUser()?.helloWord?.let {
                 sayHiView?.input(it)
             }
@@ -191,10 +204,11 @@ class AddFriendService : AccessibilityService() {
             }
             sleep(200)
             sendView.click()
+            sleep(500)
             PhoneManager.currentIndex++
             addCount++
 //            gestureClick(source.getNodeByText("发送", true)?.parent)
-            repeat(2) {
+            repeat(3) {
                 back()
                 sleep(200)
             }
@@ -210,19 +224,6 @@ class AddFriendService : AccessibilityService() {
             source.getNodeById(wxNodeId(ADD_CONTACT_BUTTON_ID)).click()
             gestureClick(source.getNodeByText("添加到通讯录", true)?.parent)
         }
-    }
-
-    /**
-     * 中断服务的回调
-     */
-    override fun onInterrupt() {
-    }
-
-    /**
-     * 服务解绑回调
-     */
-    override fun onUnbind(intent: Intent?): Boolean {
-        return super.onUnbind(intent)
     }
 
     private fun createForegroundNotification(): Notification? {

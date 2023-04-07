@@ -16,7 +16,7 @@ android {
 
     defaultConfig {
         applicationId "com.rookie.addfriend"
-        minSdk 24
+        minSdk 26
         //noinspection ExpiredTargetSdkVersion
         targetSdk 31
         versionCode versionProps['versionCode'].toInteger()
@@ -151,4 +151,7 @@ dependencies {
     implementation 'com.github.CymChad:BaseRecyclerViewAdapterHelper:3.0.11'
     //bugly
     implementation 'com.tencent.bugly:crashreport:latest.release'
+    implementation 'androidx.databinding:databinding-common:7.1.2'
+
+    implementation "com.github.permissions-dispatcher:ktx:1.1.4"
 }

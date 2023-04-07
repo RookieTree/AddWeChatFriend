@@ -2,29 +2,28 @@ package com.rookie.addfriend
 
 import android.Manifest
 import android.app.Dialog
-import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.graphics.PixelFormat
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
-import android.view.LayoutInflater
-import android.view.WindowManager
 import android.widget.Button
-import android.widget.TextView
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.blankj.utilcode.util.PermissionUtils
 import com.blankj.utilcode.util.PermissionUtils.SimpleCallback
 import com.blankj.utilcode.util.UriUtils
+import permissions.dispatcher.NeedsPermission
+import permissions.dispatcher.RuntimePermissions
+import permissions.dispatcher.ktx.PermissionsRequester
+import permissions.dispatcher.ktx.constructPermissionsRequest
+import permissions.dispatcher.ktx.constructSystemAlertWindowPermissionRequest
+import permissions.dispatcher.ktx.constructWriteSettingsPermissionRequest
 
 
 /*
@@ -33,7 +32,7 @@ import com.blankj.utilcode.util.UriUtils
  *  @文件名:   MainActivity
  *  @创建者:   rookietree
  *  @创建时间:  2023/3/17 15:15
- *  @描述：    TODO
+ *  @描述：
  */
 class MainActivity : BaseActivity() {
     override fun getLayoutID(): Int = R.layout.activity_main
@@ -44,6 +43,8 @@ class MainActivity : BaseActivity() {
     private lateinit var activityResultLauncher: ActivityResultLauncher<Intent>
     var dialog: Dialog? = null
     var contactAdapter: ContactAdapter? = null
+    private var readRequest: PermissionsRequester? = null
+    private var systemAlertRequest: PermissionsRequester? = null
 
     companion object {
         const val READ_EXTERNAL_STORAGE_REQUEST_CODE = 100
@@ -58,6 +59,14 @@ class MainActivity : BaseActivity() {
                 dealSelectFile(it)
             }
         }
+        readRequest =
+            constructPermissionsRequest(Manifest.permission.READ_EXTERNAL_STORAGE) {
+                openFileSelector()
+            }
+        systemAlertRequest =
+            constructSystemAlertWindowPermissionRequest() {
+                startApp("com.tencent.mm", "com.tencent.mm.ui.LauncherUI", "未安装微信")
+            }
     }
 
     override fun init() {
@@ -85,26 +94,11 @@ class MainActivity : BaseActivity() {
     }
 
     private fun startWeChat() {
-        startApp("com.tencent.mm", "com.tencent.mm.ui.LauncherUI", "未安装微信")
+        systemAlertRequest?.launch()
     }
 
     private fun checkReadPermissions() {
-        if (!PermissionUtils.isGranted(Manifest.permission.READ_EXTERNAL_STORAGE)) {
-            PermissionUtils.permission(Manifest.permission.READ_EXTERNAL_STORAGE)
-                .callback(object : SimpleCallback {
-                    override fun onGranted() {
-                        openFileSelector()
-                    }
-
-                    override fun onDenied() {
-
-                    }
-
-                })
-                .request()
-        } else {
-            openFileSelector()
-        }
+        readRequest?.launch()
     }
 
     // 打开系统自带的文件选择器
@@ -144,7 +138,9 @@ class MainActivity : BaseActivity() {
                         "确认"
                     ) { dialog, which ->
                         dialog.dismiss()
-                        startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
+                        val intent = Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)
+                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+                        startActivity(intent)
                     }.create()
         }
         dialog!!.show()
