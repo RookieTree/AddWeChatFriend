@@ -14,6 +14,11 @@ import java.util.Queue
  */
 object PhoneManager {
 
+    interface IAddChangedListener {
+        fun onAddChanged()
+    }
+
+    var addListener: IAddChangedListener? = null
     var currentIndex: Int = 1
 
     var contactList: MutableList<ContactUser> = mutableListOf()
@@ -34,5 +39,14 @@ object PhoneManager {
             null
         }
     }
+
+    fun addChange() {
+        currentIndex++
+        addListener?.onAddChanged()
+    }
+
+//    fun setAddListener(addChangeListener: IAddChangedListener) {
+//        this.addListener = addChangeListener
+//    }
 
 }

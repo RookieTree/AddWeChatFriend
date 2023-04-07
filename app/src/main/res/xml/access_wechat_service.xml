@@ -8,7 +8,5 @@
     android:canPerformGestures="true"
     android:description="@string/accessibility_desc"
     android:notificationTimeout="100"
+    android:packageNames="com.tencent.mm"
     android:settingsActivity="com.rookie.addfriend.MainActivity" />
-    <!--    服务是否能取回活动窗口内容的属性
-    android:canRetrieveWindowContent="true"
-    -->

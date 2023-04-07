@@ -8,14 +8,9 @@ import android.app.PendingIntent
 import android.app.PendingIntent.FLAG_IMMUTABLE
 import android.content.Context
 import android.content.Intent
-import android.graphics.PixelFormat
-import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import android.os.Message
-import android.view.Gravity
-import android.view.View
-import android.view.WindowManager
 import android.view.accessibility.AccessibilityEvent
 import androidx.core.app.NotificationCompat
 import java.lang.ref.WeakReference
@@ -51,8 +46,9 @@ class AddFriendService : AccessibilityService() {
         //单次加好友最多次数
         const val ADD_COUNT_MAX = 1
         const val ADD_MSG_CODE = 100
+
         //添加朋友频率
-        const val ADD_TIMES = 1000 * 30L
+        const val ADD_TIMES = 1000 * 3L
     }
 
     //是否开始添加好友
@@ -60,11 +56,6 @@ class AddFriendService : AccessibilityService() {
 
     //添加好友的次数
     var addCount = 0
-
-    var currEvent:AccessibilityEvent?=null
-
-    var mWindowManager:WindowManager?=null
-    var overlayView:View?=null
 
     class ScheduleHandler constructor(looper: Looper, addFriendService: AddFriendService) :
         Handler(looper) {
@@ -78,14 +69,10 @@ class AddFriendService : AccessibilityService() {
                 addFriendService.recentTask()
                 sleep(200)
                 addFriendService.back()
-//                addFriendService.currEvent?.let {
-//                    addFriendService.searchPhone(it)
-//                }
                 //一分钟后继续添加
-                sendEmptyMessageDelayed(ADD_MSG_CODE,ADD_TIMES)
+                sendEmptyMessageDelayed(ADD_MSG_CODE, ADD_TIMES)
             }
         }
-
     }
 
     var scheduleHandler: ScheduleHandler? = null
@@ -97,25 +84,6 @@ class AddFriendService : AccessibilityService() {
         scheduleHandler = ScheduleHandler(Looper.myLooper()!!, this)
         scheduleHandler?.sendEmptyMessageDelayed(ADD_MSG_CODE, ADD_TIMES)
         isStartAdd = true
-        if (mWindowManager==null){
-            // 获取 WindowManager
-            mWindowManager = getSystemService(WINDOW_SERVICE) as WindowManager
-            // 创建一个悬浮窗口 View
-            overlayView = View.inflate(this,R.layout.float_app_view,null)
-        }
-        // 设置悬浮窗口参数
-        val params = WindowManager.LayoutParams(
-            WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
-            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
-            PixelFormat.TRANSLUCENT
-        )
-        params.gravity = Gravity.BOTTOM
-        // 将悬浮窗口 View 添加到 WindowManager 中
-        mWindowManager?.addView(overlayView, params)
-    }
-
-    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        return super.onStartCommand(intent, flags, startId)
     }
 
     /**
@@ -125,7 +93,6 @@ class AddFriendService : AccessibilityService() {
         if (event == null || !isStartAdd) {
             return
         }
-        currEvent = event
         //如果大于单次添加最大值，就停止
         if (addCount >= ADD_COUNT_MAX) {
             isStartAdd = false
@@ -205,7 +172,7 @@ class AddFriendService : AccessibilityService() {
             sleep(200)
             sendView.click()
             sleep(500)
-            PhoneManager.currentIndex++
+            PhoneManager.addChange()
             addCount++
 //            gestureClick(source.getNodeByText("发送", true)?.parent)
             repeat(3) {
@@ -227,36 +194,33 @@ class AddFriendService : AccessibilityService() {
     }
 
     private fun createForegroundNotification(): Notification? {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val notificationManager =
-                getSystemService(Context.NOTIFICATION_SERVICE) as? NotificationManager
-            // 创建通知渠道，一定要写在创建显示通知之前，创建通知渠道的代码只有在第一次执行才会创建
-            // 以后每次执行创建代码检测到该渠道已存在，因此不会重复创建
-            val channelId = "add_friend"
-            notificationManager?.createNotificationChannel(
-                NotificationChannel(
-                    channelId,
-                    "添加好友",
-                    NotificationManager.IMPORTANCE_HIGH // 发送通知的等级，此处为高
+        val notificationManager =
+            getSystemService(Context.NOTIFICATION_SERVICE) as? NotificationManager
+        // 创建通知渠道，一定要写在创建显示通知之前，创建通知渠道的代码只有在第一次执行才会创建
+        // 以后每次执行创建代码检测到该渠道已存在，因此不会重复创建
+        val channelId = "add_friend"
+        notificationManager?.createNotificationChannel(
+            NotificationChannel(
+                channelId,
+                "添加好友",
+                NotificationManager.IMPORTANCE_HIGH // 发送通知的等级，此处为高
+            )
+        )
+        return NotificationCompat.Builder(this, channelId)
+            // 设置点击notification跳转，比如跳转到设置页
+            .setContentIntent(
+                PendingIntent.getActivity(
+                    this,
+                    0,
+                    Intent(this, MainActivity::class.java),
+                    FLAG_IMMUTABLE
                 )
             )
-            return NotificationCompat.Builder(this, channelId)
-                // 设置点击notification跳转，比如跳转到设置页
-                .setContentIntent(
-                    PendingIntent.getActivity(
-                        this,
-                        0,
-                        Intent(this, MainActivity::class.java),
-                        FLAG_IMMUTABLE
-                    )
-                )
-                .setSmallIcon(R.drawable.ic_app) // 设置小图标
-                .setContentTitle(getString(R.string.acc_des))
-                .setContentText("添加好友")
-                .setTicker("添加好友")
-                .build()
-        }
-        return null
+            .setSmallIcon(R.drawable.ic_app) // 设置小图标
+            .setContentTitle(getString(R.string.acc_des))
+            .setContentText("添加好友")
+            .setTicker("添加好友")
+            .build()
     }
 
     override fun onDestroy() {

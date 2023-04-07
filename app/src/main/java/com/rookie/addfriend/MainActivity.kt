@@ -4,11 +4,16 @@ import android.Manifest
 import android.app.Dialog
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.PixelFormat
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
+import android.view.Gravity
+import android.view.View
+import android.view.WindowManager
 import android.widget.Button
+import android.widget.TextView
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
@@ -45,6 +50,9 @@ class MainActivity : BaseActivity() {
     var contactAdapter: ContactAdapter? = null
     private var readRequest: PermissionsRequester? = null
     private var systemAlertRequest: PermissionsRequester? = null
+    private var mWindowManager: WindowManager? = null
+    private var overlayView: View? = null
+    private var tvIndex: TextView? = null
 
     companion object {
         const val READ_EXTERNAL_STORAGE_REQUEST_CODE = 100
@@ -65,8 +73,37 @@ class MainActivity : BaseActivity() {
             }
         systemAlertRequest =
             constructSystemAlertWindowPermissionRequest() {
+                showWindow()
                 startApp("com.tencent.mm", "com.tencent.mm.ui.LauncherUI", "未安装微信")
             }
+        PhoneManager.addListener = object : PhoneManager.IAddChangedListener {
+            override fun onAddChanged() {
+                tvIndex?.text =
+                    "正在添加${PhoneManager.currentIndex}/${PhoneManager.contactList.size - 1}位好友\n请勿操作手机"
+            }
+        }
+    }
+
+    private fun showWindow() {
+        if (mWindowManager == null) {
+            // 获取 WindowManager
+            mWindowManager = getSystemService(WINDOW_SERVICE) as WindowManager
+            // 创建一个悬浮窗口 View
+            overlayView = View.inflate(this, R.layout.float_app_view, null)
+            tvIndex = overlayView?.findViewById(R.id.tv_index)
+            // 设置悬浮窗口参数
+            val params = WindowManager.LayoutParams(
+                WindowManager.LayoutParams.MATCH_PARENT,
+                WindowManager.LayoutParams.WRAP_CONTENT,
+                WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
+                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
+                PixelFormat.TRANSLUCENT
+            )
+            // 设置窗口布局的位置和大小
+            params.gravity = Gravity.BOTTOM
+            // 将悬浮窗口 View 添加到 WindowManager 中
+            mWindowManager?.addView(overlayView, params)
+        }
     }
 
     override fun init() {
@@ -139,7 +176,6 @@ class MainActivity : BaseActivity() {
                     ) { dialog, which ->
                         dialog.dismiss()
                         val intent = Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)
-                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
                         startActivity(intent)
                     }.create()
         }
@@ -161,5 +197,10 @@ class MainActivity : BaseActivity() {
                 }
             }
         }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        mWindowManager?.removeView(overlayView)
     }
 }

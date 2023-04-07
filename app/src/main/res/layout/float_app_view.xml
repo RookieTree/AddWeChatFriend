@@ -6,10 +6,14 @@
 
     <TextView
         android:id="@+id/tv_index"
+        android:focusable="false"
+        android:clickable="false"
         android:layout_width="match_parent"
         android:layout_height="50dp"
         android:background="#37000000"
         android:textColor="#03DAC6"
+        android:paddingStart="20dp"
+        android:gravity="center_vertical"
         android:textSize="18sp"
         app:layout_constraintBottom_toBottomOf="parent" />
 
