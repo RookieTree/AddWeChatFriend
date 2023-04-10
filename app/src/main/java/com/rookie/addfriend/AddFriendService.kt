@@ -8,10 +8,17 @@ import android.app.PendingIntent
 import android.app.PendingIntent.FLAG_IMMUTABLE
 import android.content.Context
 import android.content.Intent
+import android.graphics.PixelFormat
 import android.os.Handler
 import android.os.Looper
 import android.os.Message
+import android.view.Gravity
+import android.view.LayoutInflater
+import android.view.View
+import android.view.WindowManager
 import android.view.accessibility.AccessibilityEvent
+import android.widget.TextView
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.app.NotificationCompat
 import java.lang.ref.WeakReference
 
@@ -44,12 +51,13 @@ class AddFriendService : AccessibilityService() {
         const val ADD_SEND_ID = "e9q"  // 添加二级页-发送按钮
 
         const val ADD_MSG_CODE = 100
-
     }
+
+    private var overlayView: View? = null
+    private var tvIndex: TextView? = null
 
     //是否开始添加好友
     var isStartAdd = false
-
     //添加好友的次数
     var addCount = 0
 
@@ -82,6 +90,35 @@ class AddFriendService : AccessibilityService() {
         scheduleHandler = ScheduleHandler(Looper.myLooper()!!, this)
         scheduleHandler?.sendEmptyMessageDelayed(ADD_MSG_CODE, PhoneManager.addTimes)
         isStartAdd = true
+        showWindow()
+    }
+
+    private fun showWindow() {
+        // 获取 WindowManager
+        val mWindowManager = getSystemService (WINDOW_SERVICE) as WindowManager
+        // 创建一个悬浮窗口 View
+        overlayView = (getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater).inflate(
+            R.layout.float_app_view,
+            null
+        ) as ConstraintLayout
+        tvIndex = overlayView?.findViewById(R.id.tv_index)
+        // 设置悬浮窗口参数
+        val flag = (
+                WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
+                        or WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or WindowManager.LayoutParams.FLAG_LAYOUT_INSET_DECOR
+                        or WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
+                )
+        val params = WindowManager.LayoutParams(
+            WindowManager.LayoutParams.MATCH_PARENT,
+            WindowManager.LayoutParams.WRAP_CONTENT,
+            WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
+            flag,
+            PixelFormat.TRANSLUCENT
+        )
+        // 设置窗口布局的位置和大小
+        params.gravity = Gravity.CENTER_VERTICAL or Gravity.END
+        // 将悬浮窗口 View 添加到 WindowManager 中
+        mWindowManager.addView(overlayView, params)
     }
 
     /**
@@ -170,13 +207,23 @@ class AddFriendService : AccessibilityService() {
             sleep(200)
             sendView.click()
             sleep(500)
-            PhoneManager.addChange()
+            PhoneManager.currentIndex++
+            refreshTvIndex()
             addCount++
 //            gestureClick(source.getNodeByText("发送", true)?.parent)
             repeat(2) {
                 back()
                 sleep(200)
             }
+        }
+    }
+
+    private fun refreshTvIndex() {
+        if (PhoneManager.hasAddFinish) {
+            tvIndex?.text = "已添加完"
+        } else {
+            tvIndex?.text =
+                "正在添加${PhoneManager.currentIndex}/${PhoneManager.contactList.size - 1}位好友\n请勿操作手机"
         }
     }
 

@@ -52,8 +52,8 @@ class MainActivity : BaseActivity() {
     private var mWindowManager: WindowManager? = null
     private var overlayView: View? = null
     private var tvIndex: TextView? = null
-    private var addTime = PhoneManager.ADD_TIMES_DEFAULT
-    private var addCount = PhoneManager.ADD_COUNT_MAX_DEFAULT
+    private var addTimeMax = PhoneManager.ADD_TIMES_DEFAULT
+    private var addCountMax = PhoneManager.ADD_COUNT_MAX_DEFAULT
 
     companion object {
         const val READ_EXTERNAL_STORAGE_REQUEST_CODE = 100
@@ -72,40 +72,7 @@ class MainActivity : BaseActivity() {
             openFileSelector()
         }
         systemAlertRequest = constructSystemAlertWindowPermissionRequest() {
-            showWindow()
             startApp("com.tencent.mm", "com.tencent.mm.ui.LauncherUI", "未安装微信")
-        }
-        PhoneManager.addListener = object : PhoneManager.IAddChangedListener {
-            override fun onAddChanged() {
-                if (PhoneManager.hasAddFinish) {
-                    tvIndex?.text = "已添加完"
-                } else {
-                    tvIndex?.text =
-                        "正在添加${PhoneManager.currentIndex}/${PhoneManager.contactList.size - 1}位好友\n请勿操作手机"
-                }
-            }
-        }
-    }
-
-    private fun showWindow() {
-        if (mWindowManager == null) {
-            // 获取 WindowManager
-            mWindowManager = getSystemService(WINDOW_SERVICE) as WindowManager
-            // 创建一个悬浮窗口 View
-            overlayView = View.inflate(this, R.layout.float_app_view, null)
-            tvIndex = overlayView?.findViewById(R.id.tv_index)
-            // 设置悬浮窗口参数
-            val params = WindowManager.LayoutParams(
-                WindowManager.LayoutParams.MATCH_PARENT,
-                WindowManager.LayoutParams.WRAP_CONTENT,
-                WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
-                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
-                PixelFormat.TRANSLUCENT
-            )
-            // 设置窗口布局的位置和大小
-            params.gravity = Gravity.BOTTOM
-            // 将悬浮窗口 View 添加到 WindowManager 中
-            mWindowManager?.addView(overlayView, params)
         }
     }
 
@@ -114,7 +81,7 @@ class MainActivity : BaseActivity() {
         btnAdd = findViewById(R.id.btn_add)
         rv = findViewById(R.id.rv)
         etTime = findViewById(R.id.et_time)
-        etTime = findViewById(R.id.et_count)
+        etCount = findViewById(R.id.et_count)
         rv.layoutManager = LinearLayoutManager(this)
         contactAdapter = ContactAdapter()
         rv.adapter = contactAdapter
@@ -126,11 +93,11 @@ class MainActivity : BaseActivity() {
                 shortToast("清先读取本地excel文件")
                 return@setOnClickListener
             }
-            if (addTime < PhoneManager.ADD_TIMES_DEFAULT) {
+            if (addTimeMax < PhoneManager.ADD_TIMES_DEFAULT) {
                 ToastUtils.showShort("周期最低时间为30秒，请重新输入")
                 return@setOnClickListener
             }
-            if (addCount < PhoneManager.ADD_COUNT_MAX_DEFAULT) {
+            if (addCountMax < PhoneManager.ADD_COUNT_MAX_DEFAULT) {
                 ToastUtils.showShort("周期内最低添加个数为1，请重新输入")
                 return@setOnClickListener
             }
@@ -144,9 +111,9 @@ class MainActivity : BaseActivity() {
         etTime.setOnKeyListener(object : View.OnKeyListener {
             override fun onKey(v: View?, keyCode: Int, event: KeyEvent?): Boolean {
                 if (keyCode == KeyEvent.KEYCODE_ENTER && event?.action == KeyEvent.ACTION_DOWN) {
-                    addTime = etTime.text.toString().toLong()
-                    if (addTime >= PhoneManager.ADD_TIMES_DEFAULT) {
-                        PhoneManager.addTimes = addTime * 1000
+                    addTimeMax = etTime.text.toString().toLong()
+                    if (addTimeMax >= PhoneManager.ADD_TIMES_DEFAULT) {
+                        PhoneManager.addTimes = addTimeMax * 1000
                     }
                     return true
                 }
@@ -156,9 +123,9 @@ class MainActivity : BaseActivity() {
         etCount.setOnKeyListener(object : View.OnKeyListener {
             override fun onKey(v: View?, keyCode: Int, event: KeyEvent?): Boolean {
                 if (keyCode == KeyEvent.KEYCODE_ENTER && event?.action == KeyEvent.ACTION_DOWN) {
-                    addCount = etCount.text.toString().toInt()
-                    if (addCount >= PhoneManager.ADD_COUNT_MAX_DEFAULT) {
-                        PhoneManager.addCountMax = addCount
+                    addCountMax = etCount.text.toString().toInt()
+                    if (addCountMax >= PhoneManager.ADD_COUNT_MAX_DEFAULT) {
+                        PhoneManager.addCountMax = addCountMax
                     }
                     return true
                 }
