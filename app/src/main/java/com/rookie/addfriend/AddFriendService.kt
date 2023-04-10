@@ -43,12 +43,8 @@ class AddFriendService : AccessibilityService() {
         const val ADD_NAME_ID = "j0z"  // 备注edit
         const val ADD_SEND_ID = "e9q"  // 添加二级页-发送按钮
 
-        //单次加好友最多次数
-        const val ADD_COUNT_MAX = 1
         const val ADD_MSG_CODE = 100
 
-        //添加朋友频率
-        const val ADD_TIMES = 1000 * 3L
     }
 
     //是否开始添加好友
@@ -66,11 +62,13 @@ class AddFriendService : AccessibilityService() {
             if (msg.what == ADD_MSG_CODE) {
                 addFriendService.isStartAdd = true
                 addFriendService.addCount = 0
-                addFriendService.recentTask()
-                sleep(200)
                 addFriendService.back()
                 //一分钟后继续添加
-                sendEmptyMessageDelayed(ADD_MSG_CODE, ADD_TIMES)
+                if (PhoneManager.hasAddFinish) {
+                    addFriendService.isStartAdd = false
+                    return
+                }
+                sendEmptyMessageDelayed(ADD_MSG_CODE, PhoneManager.addTimes)
             }
         }
     }
@@ -82,7 +80,7 @@ class AddFriendService : AccessibilityService() {
         // 创建Notification渠道，并开启前台服务
         createForegroundNotification()?.let { startForeground(1, it) }
         scheduleHandler = ScheduleHandler(Looper.myLooper()!!, this)
-        scheduleHandler?.sendEmptyMessageDelayed(ADD_MSG_CODE, ADD_TIMES)
+        scheduleHandler?.sendEmptyMessageDelayed(ADD_MSG_CODE, PhoneManager.addTimes)
         isStartAdd = true
     }
 
@@ -94,7 +92,7 @@ class AddFriendService : AccessibilityService() {
             return
         }
         //如果大于单次添加最大值，就停止
-        if (addCount >= ADD_COUNT_MAX) {
+        if (addCount >= PhoneManager.addCountMax) {
             isStartAdd = false
             return
         }
@@ -123,7 +121,7 @@ class AddFriendService : AccessibilityService() {
     }
 
     private fun gotoSearch(event: AccessibilityEvent) {
-        if (PhoneManager.contactList.isEmpty()) {
+        if (PhoneManager.contactList.isEmpty() || PhoneManager.hasAddFinish) {
             return
         }
         event.source?.let { source ->
@@ -137,7 +135,7 @@ class AddFriendService : AccessibilityService() {
     }
 
     private fun searchPhone(event: AccessibilityEvent) {
-        if (PhoneManager.contactList.isEmpty()) {
+        if (PhoneManager.contactList.isEmpty() || PhoneManager.hasAddFinish) {
             return
         }
         event.source?.let { source ->
@@ -175,7 +173,7 @@ class AddFriendService : AccessibilityService() {
             PhoneManager.addChange()
             addCount++
 //            gestureClick(source.getNodeByText("发送", true)?.parent)
-            repeat(3) {
+            repeat(2) {
                 back()
                 sleep(200)
             }

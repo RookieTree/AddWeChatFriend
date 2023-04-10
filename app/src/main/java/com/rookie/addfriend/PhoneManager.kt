@@ -1,8 +1,5 @@
 package com.rookie.addfriend
 
-import java.util.LinkedList
-import java.util.Queue
-
 
 /*
  *  @项目名：  AddFriend 
@@ -10,9 +7,12 @@ import java.util.Queue
  *  @文件名:   PhoneManager
  *  @创建者:   rookietree
  *  @创建时间:  2023/3/18 00:46
- *  @描述：    TODO
+ *  @描述：
  */
 object PhoneManager {
+
+    const val ADD_COUNT_MAX_DEFAULT = 1
+    const val ADD_TIMES_DEFAULT = 30L
 
     interface IAddChangedListener {
         fun onAddChanged()
@@ -20,6 +20,12 @@ object PhoneManager {
 
     var addListener: IAddChangedListener? = null
     var currentIndex: Int = 1
+
+    //添加朋友频率
+    var addTimes = 1000 * ADD_TIMES_DEFAULT
+
+    //周期内添加好友数
+    var addCountMax = ADD_COUNT_MAX_DEFAULT
 
     var contactList: MutableList<ContactUser> = mutableListOf()
 
@@ -44,9 +50,5 @@ object PhoneManager {
         currentIndex++
         addListener?.onAddChanged()
     }
-
-//    fun setAddListener(addChangeListener: IAddChangedListener) {
-//        this.addListener = addChangeListener
-//    }
 
 }

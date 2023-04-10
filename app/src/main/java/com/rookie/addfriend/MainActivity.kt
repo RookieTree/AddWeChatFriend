@@ -6,13 +6,14 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.PixelFormat
 import android.net.Uri
-import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
 import android.view.Gravity
+import android.view.KeyEvent
 import android.view.View
 import android.view.WindowManager
 import android.widget.Button
+import android.widget.EditText
 import android.widget.TextView
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultLauncher
@@ -20,15 +21,11 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.blankj.utilcode.util.PermissionUtils
-import com.blankj.utilcode.util.PermissionUtils.SimpleCallback
+import com.blankj.utilcode.util.ToastUtils
 import com.blankj.utilcode.util.UriUtils
-import permissions.dispatcher.NeedsPermission
-import permissions.dispatcher.RuntimePermissions
 import permissions.dispatcher.ktx.PermissionsRequester
 import permissions.dispatcher.ktx.constructPermissionsRequest
 import permissions.dispatcher.ktx.constructSystemAlertWindowPermissionRequest
-import permissions.dispatcher.ktx.constructWriteSettingsPermissionRequest
 
 
 /*
@@ -45,14 +42,18 @@ class MainActivity : BaseActivity() {
     private lateinit var btnAdd: Button
     private lateinit var btnRead: Button
     private lateinit var rv: RecyclerView
+    private lateinit var etTime: EditText
+    private lateinit var etCount: EditText
     private lateinit var activityResultLauncher: ActivityResultLauncher<Intent>
-    var dialog: Dialog? = null
+    private var dialog: Dialog? = null
     var contactAdapter: ContactAdapter? = null
     private var readRequest: PermissionsRequester? = null
     private var systemAlertRequest: PermissionsRequester? = null
     private var mWindowManager: WindowManager? = null
     private var overlayView: View? = null
     private var tvIndex: TextView? = null
+    private var addTime = PhoneManager.ADD_TIMES_DEFAULT
+    private var addCount = PhoneManager.ADD_COUNT_MAX_DEFAULT
 
     companion object {
         const val READ_EXTERNAL_STORAGE_REQUEST_CODE = 100
@@ -67,19 +68,21 @@ class MainActivity : BaseActivity() {
                 dealSelectFile(it)
             }
         }
-        readRequest =
-            constructPermissionsRequest(Manifest.permission.READ_EXTERNAL_STORAGE) {
-                openFileSelector()
-            }
-        systemAlertRequest =
-            constructSystemAlertWindowPermissionRequest() {
-                showWindow()
-                startApp("com.tencent.mm", "com.tencent.mm.ui.LauncherUI", "未安装微信")
-            }
+        readRequest = constructPermissionsRequest(Manifest.permission.READ_EXTERNAL_STORAGE) {
+            openFileSelector()
+        }
+        systemAlertRequest = constructSystemAlertWindowPermissionRequest() {
+            showWindow()
+            startApp("com.tencent.mm", "com.tencent.mm.ui.LauncherUI", "未安装微信")
+        }
         PhoneManager.addListener = object : PhoneManager.IAddChangedListener {
             override fun onAddChanged() {
-                tvIndex?.text =
-                    "正在添加${PhoneManager.currentIndex}/${PhoneManager.contactList.size - 1}位好友\n请勿操作手机"
+                if (PhoneManager.hasAddFinish) {
+                    tvIndex?.text = "已添加完"
+                } else {
+                    tvIndex?.text =
+                        "正在添加${PhoneManager.currentIndex}/${PhoneManager.contactList.size - 1}位好友\n请勿操作手机"
+                }
             }
         }
     }
@@ -110,6 +113,8 @@ class MainActivity : BaseActivity() {
         btnRead = findViewById(R.id.btn_read)
         btnAdd = findViewById(R.id.btn_add)
         rv = findViewById(R.id.rv)
+        etTime = findViewById(R.id.et_time)
+        etTime = findViewById(R.id.et_count)
         rv.layoutManager = LinearLayoutManager(this)
         contactAdapter = ContactAdapter()
         rv.adapter = contactAdapter
@@ -121,6 +126,14 @@ class MainActivity : BaseActivity() {
                 shortToast("清先读取本地excel文件")
                 return@setOnClickListener
             }
+            if (addTime < PhoneManager.ADD_TIMES_DEFAULT) {
+                ToastUtils.showShort("周期最低时间为30秒，请重新输入")
+                return@setOnClickListener
+            }
+            if (addCount < PhoneManager.ADD_COUNT_MAX_DEFAULT) {
+                ToastUtils.showShort("周期内最低添加个数为1，请重新输入")
+                return@setOnClickListener
+            }
             if (!isAccessibilitySettingsOn(AddFriendService::class.java)) {
                 showAccessDialog()
             } else {
@@ -128,6 +141,30 @@ class MainActivity : BaseActivity() {
                 startWeChat()
             }
         }
+        etTime.setOnKeyListener(object : View.OnKeyListener {
+            override fun onKey(v: View?, keyCode: Int, event: KeyEvent?): Boolean {
+                if (keyCode == KeyEvent.KEYCODE_ENTER && event?.action == KeyEvent.ACTION_DOWN) {
+                    addTime = etTime.text.toString().toLong()
+                    if (addTime >= PhoneManager.ADD_TIMES_DEFAULT) {
+                        PhoneManager.addTimes = addTime * 1000
+                    }
+                    return true
+                }
+                return false
+            }
+        })
+        etCount.setOnKeyListener(object : View.OnKeyListener {
+            override fun onKey(v: View?, keyCode: Int, event: KeyEvent?): Boolean {
+                if (keyCode == KeyEvent.KEYCODE_ENTER && event?.action == KeyEvent.ACTION_DOWN) {
+                    addCount = etCount.text.toString().toInt()
+                    if (addCount >= PhoneManager.ADD_COUNT_MAX_DEFAULT) {
+                        PhoneManager.addCountMax = addCount
+                    }
+                    return true
+                }
+                return false
+            }
+        })
     }
 
     private fun startWeChat() {
@@ -149,9 +186,7 @@ class MainActivity : BaseActivity() {
     }
 
     override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<out String>,
-        grantResults: IntArray
+        requestCode: Int, permissions: Array<out String>, grantResults: IntArray
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == READ_EXTERNAL_STORAGE_REQUEST_CODE && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
@@ -168,16 +203,14 @@ class MainActivity : BaseActivity() {
 
     private fun showAccessDialog() {
         if (dialog == null) {
-            dialog =
-                AlertDialog.Builder(this)
-                    .setTitle("请打开<<${this.getString(R.string.acc_des)}>>无障碍服务")
-                    .setPositiveButton(
-                        "确认"
-                    ) { dialog, which ->
-                        dialog.dismiss()
-                        val intent = Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)
-                        startActivity(intent)
-                    }.create()
+            dialog = AlertDialog.Builder(this)
+                .setTitle("请打开<<${this.getString(R.string.acc_des)}>>无障碍服务").setPositiveButton(
+                    "确认"
+                ) { dialog, which ->
+                    dialog.dismiss()
+                    val intent = Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)
+                    startActivity(intent)
+                }.create()
         }
         dialog!!.show()
     }
