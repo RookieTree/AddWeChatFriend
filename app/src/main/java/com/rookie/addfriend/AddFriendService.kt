@@ -94,7 +94,7 @@ class AddFriendService : AccessibilityService() {
         scheduleHandler = ScheduleHandler(Looper.myLooper()!!, this)
         scheduleHandler?.sendEmptyMessageDelayed(ADD_MSG_CODE, PhoneManager.addTimes)
         isStartAdd = true
-//        showWindow()
+        showWindow()
     }
 
     private fun showWindow() {
@@ -152,9 +152,6 @@ class AddFriendService : AccessibilityService() {
                 }
                 ADD_CONTACT_USER_UI -> {
                     addContactSecondPage(event)
-                }
-                ADD_CONTACT_USER_SECOND_UI -> {
-                    back()
                 }
             }
         }
