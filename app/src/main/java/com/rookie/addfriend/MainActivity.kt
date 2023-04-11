@@ -19,10 +19,14 @@ import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
+import androidx.core.widget.ContentLoadingProgressBar
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.blankj.utilcode.util.ToastUtils
 import com.blankj.utilcode.util.UriUtils
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import permissions.dispatcher.ktx.PermissionsRequester
 import permissions.dispatcher.ktx.constructPermissionsRequest
 import permissions.dispatcher.ktx.constructSystemAlertWindowPermissionRequest
@@ -44,14 +48,12 @@ class MainActivity : BaseActivity() {
     private lateinit var rv: RecyclerView
     private lateinit var etTime: EditText
     private lateinit var etCount: EditText
+    private lateinit var progress: ContentLoadingProgressBar
     private lateinit var activityResultLauncher: ActivityResultLauncher<Intent>
     private var dialog: Dialog? = null
     var contactAdapter: ContactAdapter? = null
     private var readRequest: PermissionsRequester? = null
     private var systemAlertRequest: PermissionsRequester? = null
-    private var mWindowManager: WindowManager? = null
-    private var overlayView: View? = null
-    private var tvIndex: TextView? = null
     private var addTimeMax = PhoneManager.ADD_TIMES_DEFAULT
     private var addCountMax = PhoneManager.ADD_COUNT_MAX_DEFAULT
 
@@ -82,6 +84,7 @@ class MainActivity : BaseActivity() {
         rv = findViewById(R.id.rv)
         etTime = findViewById(R.id.et_time)
         etCount = findViewById(R.id.et_count)
+        progress = findViewById(R.id.progress)
         rv.layoutManager = LinearLayoutManager(this)
         contactAdapter = ContactAdapter()
         rv.adapter = contactAdapter
@@ -187,20 +190,23 @@ class MainActivity : BaseActivity() {
             // 用户未选择任何文件，直接返回
             return
         }
-        val uri: Uri? = it.data!!.data // 获取用户选择文件的URI
-        uri?.let {
-            val file = UriUtils.uri2File(it)
-            file?.run {
-                if (ExcelUtils.checkIfExcelFile(file)) {
-                    ExcelUtils.readExcelInContact(file) //读取Excel file 内容
+        val coroutineScope = CoroutineScope(Dispatchers.Main)
+        val uri: Uri = it.data!!.data ?: return // 获取用户选择文件的URI
+        val file = UriUtils.uri2File(uri) ?: return
+        if (ExcelUtils.checkIfExcelFile(file)) {
+            //读取Excel file 内容
+            progress.visibility = View.VISIBLE
+            coroutineScope.launch {
+                val contacts = ExcelUtils.readExcelInContact(file)
+                contacts.let {
+                    PhoneManager.contactList.clear()
+                    PhoneManager.contactList.addAll(it)
                     contactAdapter?.setNewInstance(PhoneManager.contactList)
+                    progress.visibility = View.GONE
                 }
             }
+        } else {
+            ToastUtils.showShort("请选择excel文件")
         }
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        mWindowManager?.removeView(overlayView)
     }
 }

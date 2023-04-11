@@ -39,6 +39,8 @@ class AddFriendService : AccessibilityService() {
         const val CONTACT_USER_UI = "com.tencent.mm.plugin.profile.ui.ContactInfoUI"  // 添加一级页
         const val ADD_CONTACT_USER_UI =
             "com.tencent.mm.plugin.profile.ui.SayHiWithSnsPermissionUI"  // 添加页二级页
+        const val ADD_CONTACT_USER_SECOND_UI =
+            "android.widget.LinearLayout"  // 异常ui
 
         const val HOME_SEARCH_ICON_ID = "gsl"  // 首页-搜索框图标
         const val HOME_CHAT_TAB_ID = "kd_"  // 首页-微信tab
@@ -55,9 +57,11 @@ class AddFriendService : AccessibilityService() {
 
     private var overlayView: View? = null
     private var tvIndex: TextView? = null
+    private var mWindowManager: WindowManager? = null
 
     //是否开始添加好友
     var isStartAdd = false
+
     //添加好友的次数
     var addCount = 0
 
@@ -90,12 +94,12 @@ class AddFriendService : AccessibilityService() {
         scheduleHandler = ScheduleHandler(Looper.myLooper()!!, this)
         scheduleHandler?.sendEmptyMessageDelayed(ADD_MSG_CODE, PhoneManager.addTimes)
         isStartAdd = true
-        showWindow()
+//        showWindow()
     }
 
     private fun showWindow() {
         // 获取 WindowManager
-        val mWindowManager = getSystemService (WINDOW_SERVICE) as WindowManager
+        mWindowManager = getSystemService(WINDOW_SERVICE) as WindowManager
         // 创建一个悬浮窗口 View
         overlayView = (getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater).inflate(
             R.layout.float_app_view,
@@ -118,7 +122,7 @@ class AddFriendService : AccessibilityService() {
         // 设置窗口布局的位置和大小
         params.gravity = Gravity.CENTER_VERTICAL or Gravity.END
         // 将悬浮窗口 View 添加到 WindowManager 中
-        mWindowManager.addView(overlayView, params)
+        mWindowManager?.addView(overlayView, params)
     }
 
     /**
@@ -148,6 +152,9 @@ class AddFriendService : AccessibilityService() {
                 }
                 ADD_CONTACT_USER_UI -> {
                     addContactSecondPage(event)
+                }
+                ADD_CONTACT_USER_SECOND_UI -> {
+                    back()
                 }
             }
         }
@@ -270,6 +277,7 @@ class AddFriendService : AccessibilityService() {
 
     override fun onDestroy() {
         stopForeground(true)
+        mWindowManager?.removeView(overlayView)
         super.onDestroy()
     }
 

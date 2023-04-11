@@ -50,23 +50,23 @@ object ExcelUtils {
     }
 
     @Throws(FileNotFoundException::class)
-    fun readExcelInContact(file: File?) {
+    suspend fun readExcelInContact(file: File?): List<ContactUser> {
+        val constants = arrayListOf<ContactUser>()
         if (file == null) {
             logD("读取Excel出错，文件为空文件")
-            return
+            return constants
         }
         val stream: InputStream = FileInputStream(file)
         try {
             val workbook = XSSFWorkbook(stream)
             val sheet: XSSFSheet = workbook.getSheetAt(0)
             val rowsCount: Int = sheet.physicalNumberOfRows
-            PhoneManager.contactList.clear()
             val row0 = sheet.getRow(0)
             val name = getCellAsString(row0, 0)
             val phone =
                 getCellAsString(row0, 1)
             val sayHi = getCellAsString(row0, 2)
-            PhoneManager.contactList.add(ContactUser(phone, name, sayHi))
+            constants.add(ContactUser(phone, name, sayHi))
             //从第二行开始读
             for (r in 1 until rowsCount) {
                 val row: Row = sheet.getRow(r)
@@ -76,12 +76,13 @@ object ExcelUtils {
                 val sayHi = getCellAsString(row, 2)
                 //每次读取一行的内容
                 val contactUser = ContactUser(phone, name, sayHi)
-                PhoneManager.contactList.add(contactUser)
+                constants.add(contactUser)
             }
         } catch (e: Exception) {
             /* proper exception handling to be here */
             logD(e.toString())
         }
+        return constants
     }
 
     /**

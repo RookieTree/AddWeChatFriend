@@ -27,7 +27,7 @@ object PhoneManager {
     //周期内添加好友数
     var addCountMax = ADD_COUNT_MAX_DEFAULT
 
-    var contactList: MutableList<ContactUser> = mutableListOf()
+    var contactList = mutableListOf<ContactUser>()
 
     val hasAddFinish: Boolean
         get() {
