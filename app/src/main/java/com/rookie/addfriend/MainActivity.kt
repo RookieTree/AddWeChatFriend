@@ -14,11 +14,14 @@ import android.view.View
 import android.view.WindowManager
 import android.widget.Button
 import android.widget.EditText
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
+import androidx.constraintlayout.widget.Group
+import androidx.core.view.isVisible
 import androidx.core.widget.ContentLoadingProgressBar
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -49,6 +52,8 @@ class MainActivity : BaseActivity() {
     private lateinit var etTime: EditText
     private lateinit var etCount: EditText
     private lateinit var progress: ContentLoadingProgressBar
+    private lateinit var tvTotal: TextView
+    private lateinit var ivSetting: ImageView
     private lateinit var activityResultLauncher: ActivityResultLauncher<Intent>
     private var dialog: Dialog? = null
     var contactAdapter: ContactAdapter? = null
@@ -85,6 +90,16 @@ class MainActivity : BaseActivity() {
         etTime = findViewById(R.id.et_time)
         etCount = findViewById(R.id.et_count)
         progress = findViewById(R.id.progress)
+        tvTotal = findViewById(R.id.tv_total)
+        ivSetting = findViewById(R.id.iv_setting)
+        val groupSetting = findViewById<Group>(R.id.group_setting)
+        ivSetting.setOnClickListener {
+            if (groupSetting.isVisible) {
+                groupSetting.visibility = View.GONE
+            } else {
+                groupSetting.visibility = View.VISIBLE
+            }
+        }
         rv.layoutManager = LinearLayoutManager(this)
         contactAdapter = ContactAdapter()
         rv.adapter = contactAdapter
@@ -202,6 +217,7 @@ class MainActivity : BaseActivity() {
                     PhoneManager.contactList.clear()
                     PhoneManager.contactList.addAll(it)
                     contactAdapter?.setNewInstance(PhoneManager.contactList)
+                    tvTotal.text = "好友总数量: ${PhoneManager.contactList.size - 1}"
                     progress.visibility = View.GONE
                 }
             }

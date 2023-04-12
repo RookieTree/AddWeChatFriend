@@ -1,85 +1,182 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:focusable="true"
     android:focusableInTouchMode="true"
-    android:background="@color/white">
+    android:animateLayoutChanges="true"
+    android:background="@color/color_dedede">
 
-    <Button
-        android:id="@+id/btn_read"
+    <View
+        android:id="@+id/title_bg"
+        app:layout_constraintTop_toTopOf="parent"
+        android:background="@color/color_4472EA"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"/>
+
+    <TextView
+        android:id="@+id/tv_title"
         android:layout_width="wrap_content"
         android:layout_height="60dp"
-        android:layout_marginBottom="20dp"
-        android:text="选择本地excel"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/btn_add"
-        app:layout_constraintHorizontal_chainStyle="spread"
-        app:layout_constraintStart_toStartOf="parent" />
+        android:gravity="center"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:text="添加微信好友"
+        android:layout_marginStart="20dp"
+        android:textColor="@color/white"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
-    <Button
-        android:id="@+id/btn_add"
+    <TextView
+        android:id="@+id/tv_total"
         android:layout_width="wrap_content"
         android:layout_height="60dp"
-        android:layout_marginTop="20dp"
-        android:text="批量添加微信朋友"
-        app:layout_constraintBottom_toBottomOf="@+id/btn_read"
+        android:layout_marginEnd="20dp"
+        android:gravity="center"
+        android:text="好友总数量: 0"
+        android:textColor="@color/white"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/btn_read" />
-
-    <EditText
-        android:id="@+id/et_count"
-        android:layout_width="100dp"
-        android:layout_height="50dp"
-        android:layout_marginBottom="10dp"
-        android:layout_marginStart="30dp"
-        android:background="@drawable/shape_rect_c10_dedede"
-        android:gravity="center"
-        android:hint="默认1个"
-        android:inputType="number"
-        android:textSize="18sp"
-        app:layout_constraintBottom_toTopOf="@+id/btn_read"
-        app:layout_constraintStart_toStartOf="parent" />
-
-    <EditText
-        android:id="@+id/et_time"
-        android:layout_width="100dp"
-        android:layout_height="50dp"
-        android:layout_marginBottom="10dp"
-        android:layout_marginEnd="30dp"
-        android:background="@drawable/shape_rect_c10_dedede"
-        android:gravity="center"
-        android:hint="最低30s"
-        android:inputType="number"
-        android:textSize="18sp"
-        app:layout_constraintBottom_toTopOf="@+id/btn_read"
-        app:layout_constraintEnd_toEndOf="parent" />
-
-    <TextView
-        android:id="@+id/tv_time"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="周期时间(秒)"
-        app:layout_constraintBottom_toTopOf="@+id/et_count"
-        app:layout_constraintStart_toStartOf="@+id/et_time" />
-
-    <TextView
-        android:id="@+id/tv_count"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="周期内添加好友数量"
-        app:layout_constraintBottom_toTopOf="@+id/et_count"
-        app:layout_constraintStart_toStartOf="@+id/et_count" />
-
+        app:layout_constraintTop_toTopOf="parent" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rv"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_margin="10dp"
-        app:layout_constraintBottom_toTopOf="@+id/tv_count"
-        app:layout_constraintTop_toTopOf="parent" />
+        android:background="@drawable/shape_white_c10"
+        app:layout_constraintBottom_toTopOf="@+id/add_bg"
+        app:layout_constraintTop_toBottomOf="@+id/title_bg"
+        app:layout_constraintVertical_bias="0.6"
+        tools:layout_editor_absoluteX="10dp" />
+
+    <View
+        android:id="@+id/setting_bg"
+        android:layout_width="match_parent"
+        android:layout_height="100dp"
+        android:background="@drawable/shape_blue_c10"
+        app:layout_constraintBottom_toTopOf="@+id/add_bg" />
+
+    <TextView
+        android:id="@+id/tv_setting"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="设置"
+        android:textSize="18sp"
+        android:layout_marginTop="10dp"
+        android:layout_marginStart="10dp"
+        android:textColor="@color/white"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/setting_bg" />
+
+    <LinearLayout
+        android:id="@+id/ll_count"
+        android:layout_width="150dp"
+        android:layout_height="50dp"
+        android:paddingStart="10dp"
+        android:paddingEnd="10dp"
+        android:layout_marginBottom="10dp"
+        android:orientation="horizontal"
+        android:background="@drawable/shape_rect_c10_dedede"
+        app:layout_constraintBottom_toBottomOf="@+id/setting_bg"
+        app:layout_constraintEnd_toStartOf="@+id/ll_time"
+        app:layout_constraintHorizontal_chainStyle="spread"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <TextView
+            android:id="@+id/tv_count"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:gravity="center_vertical"
+            android:layout_height="wrap_content"
+            android:text="周期个数"
+            app:layout_constraintBottom_toTopOf="@+id/et_count"
+            app:layout_constraintStart_toStartOf="@+id/et_count" />
+
+        <EditText
+            android:id="@+id/et_count"
+            android:layout_width="50dp"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:hint="1"
+            android:inputType="number"
+            android:textSize="18sp"
+            app:layout_constraintBottom_toTopOf="@+id/btn_read"
+            app:layout_constraintStart_toStartOf="parent" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/ll_time"
+        android:layout_width="150dp"
+        android:layout_height="50dp"
+        android:orientation="horizontal"
+        android:paddingStart="10dp"
+        android:paddingEnd="10dp"
+        android:background="@drawable/shape_rect_c10_dedede"
+        app:layout_constraintTop_toTopOf="@+id/ll_count"
+        app:layout_constraintBottom_toBottomOf="@+id/ll_count"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/ll_count">
+
+        <TextView
+            android:id="@+id/tv_time"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:gravity="center_vertical"
+            android:layout_height="wrap_content"
+            android:text="周期时间(秒)"
+            app:layout_constraintBottom_toTopOf="@+id/et_count"
+            app:layout_constraintStart_toStartOf="@+id/et_time" />
+
+        <EditText
+            android:id="@+id/et_time"
+            android:layout_width="50dp"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:hint="30"
+            android:inputType="number"
+            android:textSize="18sp"
+            app:layout_constraintBottom_toTopOf="@+id/btn_read"
+            app:layout_constraintEnd_toEndOf="parent" />
+    </LinearLayout>
+
+    <View
+        android:id="@+id/add_bg"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:background="@color/white"
+        android:layout_width="match_parent"
+        android:layout_height="65dp"/>
+
+    <ImageView
+        android:id="@+id/iv_setting"
+        android:layout_width="25dp"
+        android:layout_height="25dp"
+        android:layout_marginStart="15dp"
+        android:src="@drawable/icon_setting"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/add_bg" />
+
+    <Button
+        android:id="@+id/btn_read"
+        android:layout_width="wrap_content"
+        android:layout_height="50dp"
+        android:text="选择本地excel"
+        app:layout_constraintTop_toTopOf="@+id/add_bg"
+        android:layout_marginEnd="10dp"
+        app:layout_constraintBottom_toBottomOf="@+id/add_bg"
+        app:layout_constraintEnd_toStartOf="@+id/btn_add" />
+
+    <Button
+        android:id="@+id/btn_add"
+        android:layout_width="wrap_content"
+        android:layout_height="50dp"
+        android:text="批量添加好友"
+        android:layout_marginEnd="10dp"
+        app:layout_constraintTop_toTopOf="@+id/add_bg"
+        app:layout_constraintBottom_toBottomOf="@+id/add_bg"
+        app:layout_constraintEnd_toEndOf="parent" />
 
     <androidx.core.widget.ContentLoadingProgressBar
         android:id="@+id/progress"
@@ -91,4 +188,10 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <androidx.constraintlayout.widget.Group
+        android:id="@+id/group_setting"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:constraint_referenced_ids="setting_bg,tv_setting,ll_count,ll_time" />
 </androidx.constraintlayout.widget.ConstraintLayout>
