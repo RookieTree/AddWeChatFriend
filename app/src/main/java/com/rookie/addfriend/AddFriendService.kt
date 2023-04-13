@@ -124,6 +124,7 @@ class AddFriendService : AccessibilityService() {
         params.gravity = Gravity.CENTER_VERTICAL or Gravity.END
         // 将悬浮窗口 View 添加到 WindowManager 中
         mWindowManager?.addView(overlayView, params)
+        refreshTvIndex()
     }
 
     /**
@@ -202,7 +203,7 @@ class AddFriendService : AccessibilityService() {
             sleep(200)
             val sayHiView = source.getNodeById(wxNodeId(ADD_SAYHI_ID))
             val nameView = source.getNodeById(wxNodeId(ADD_NAME_ID))
-            val sendView = source.getNodeById(wxNodeId(ADD_SEND_ID))
+//            val sendView = source.getNodeById(wxNodeId(ADD_SEND_ID))
             PhoneManager.getCurrentUser()?.helloWord?.let {
                 sayHiView?.input(it)
             }
@@ -210,12 +211,13 @@ class AddFriendService : AccessibilityService() {
                 nameView?.input(it)
             }
             sleep(200)
-            sendView.click()
+//            sendView.click()
+            gestureClick(source.getNodeByText("发送", true)?.parent)
             sleep(500)
             PhoneManager.currentIndex++
             refreshTvIndex()
             addCount++
-//            gestureClick(source.getNodeByText("发送", true)?.parent)
+//
             repeat(2) {
                 back()
                 sleep(200)
