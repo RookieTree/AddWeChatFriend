@@ -95,7 +95,7 @@ class AddFriendService : AccessibilityService() {
         scheduleHandler = ScheduleHandler(Looper.myLooper()!!, this)
         scheduleHandler?.sendEmptyMessageDelayed(ADD_MSG_CODE, PhoneManager.addTimes)
         isStartAdd = true
-//        showWindow()
+        showWindow()
     }
 
     private fun showWindow() {

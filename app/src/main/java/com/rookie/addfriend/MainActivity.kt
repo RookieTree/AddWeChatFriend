@@ -8,6 +8,9 @@ import android.graphics.PixelFormat
 import android.net.Uri
 import android.os.Bundle
 import android.provider.Settings
+import android.text.Editable
+import android.text.TextUtils
+import android.text.TextWatcher
 import android.view.Gravity
 import android.view.KeyEvent
 import android.view.View
@@ -23,10 +26,12 @@ import androidx.appcompat.app.AlertDialog
 import androidx.constraintlayout.widget.Group
 import androidx.core.view.isVisible
 import androidx.core.widget.ContentLoadingProgressBar
+import androidx.core.widget.addTextChangedListener
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.blankj.utilcode.util.ToastUtils
 import com.blankj.utilcode.util.UriUtils
+import com.google.android.material.internal.TextWatcherAdapter
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -59,8 +64,6 @@ class MainActivity : BaseActivity() {
     var contactAdapter: ContactAdapter? = null
     private var readRequest: PermissionsRequester? = null
     private var systemAlertRequest: PermissionsRequester? = null
-    private var addTimeMax = PhoneManager.ADD_TIMES_DEFAULT
-    private var addCountMax = PhoneManager.ADD_COUNT_MAX_DEFAULT
 
     companion object {
         const val READ_EXTERNAL_STORAGE_REQUEST_CODE = 100
@@ -79,7 +82,12 @@ class MainActivity : BaseActivity() {
             openFileSelector()
         }
         systemAlertRequest = constructSystemAlertWindowPermissionRequest() {
-            startApp("com.tencent.mm", "com.tencent.mm.ui.LauncherUI", "未安装微信")
+            if (!isAccessibilitySettingsOn(AddFriendService::class.java)) {
+                showAccessDialog()
+            } else {
+                PhoneManager.resetIndex()
+                startWeChat()
+            }
         }
     }
 
@@ -111,49 +119,65 @@ class MainActivity : BaseActivity() {
                 shortToast("清先读取本地excel文件")
                 return@setOnClickListener
             }
-            if (addTimeMax < PhoneManager.ADD_TIMES_DEFAULT) {
-                ToastUtils.showShort("周期最低时间为30秒，请重新输入")
-                return@setOnClickListener
-            }
-            if (addCountMax < PhoneManager.ADD_COUNT_MAX_DEFAULT) {
-                ToastUtils.showShort("周期内最低添加个数为1，请重新输入")
-                return@setOnClickListener
-            }
-            if (!isAccessibilitySettingsOn(AddFriendService::class.java)) {
-                showAccessDialog()
-            } else {
-                PhoneManager.resetIndex()
-                startWeChat()
-            }
+            systemAlertRequest?.launch()
         }
-        etTime.setOnKeyListener(object : View.OnKeyListener {
-            override fun onKey(v: View?, keyCode: Int, event: KeyEvent?): Boolean {
-                if (keyCode == KeyEvent.KEYCODE_ENTER && event?.action == KeyEvent.ACTION_DOWN) {
-                    addTimeMax = etTime.text.toString().toLong()
-                    if (addTimeMax >= PhoneManager.ADD_TIMES_DEFAULT) {
-                        PhoneManager.addTimes = addTimeMax * 1000
-                    }
-                    return true
-                }
-                return false
+        etTime.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
             }
-        })
-        etCount.setOnKeyListener(object : View.OnKeyListener {
-            override fun onKey(v: View?, keyCode: Int, event: KeyEvent?): Boolean {
-                if (keyCode == KeyEvent.KEYCODE_ENTER && event?.action == KeyEvent.ACTION_DOWN) {
-                    addCountMax = etCount.text.toString().toInt()
-                    if (addCountMax >= PhoneManager.ADD_COUNT_MAX_DEFAULT) {
-                        PhoneManager.addCountMax = addCountMax
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+            }
+
+            override fun afterTextChanged(s: Editable?) {
+                val time = s?.toString()
+                if (TextUtils.isEmpty(time)){
+                    PhoneManager.addTimes=PhoneManager.ADD_TIMES_DEFAULT
+                }else{
+                    time?.toLong()?.let {
+                        checkTime(it)
                     }
-                    return true
                 }
-                return false
+            }
+
+        })
+        etCount.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+            }
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+            }
+
+            override fun afterTextChanged(s: Editable?) {
+                val count = s?.toString()
+                if (TextUtils.isEmpty(count)){
+                    PhoneManager.addCountMax=PhoneManager.ADD_COUNT_MAX_DEFAULT
+                }else{
+                    count?.toInt()?.let {
+                        checkCount(it)
+                    }
+                }
             }
         })
     }
 
+    private fun checkCount(count: Int) {
+        if (count >= PhoneManager.ADD_COUNT_MAX_DEFAULT) {
+            PhoneManager.addCountMax = count
+        } else {
+            ToastUtils.showShort("最少1个")
+        }
+    }
+
+    private fun checkTime(time: Long) {
+        if (time >= PhoneManager.ADD_TIMES_DEFAULT) {
+            PhoneManager.addTimes = time * 1000
+        } else {
+            ToastUtils.showShort("最少30s")
+        }
+    }
+
     private fun startWeChat() {
-        systemAlertRequest?.launch()
+        startApp("com.tencent.mm", "com.tencent.mm.ui.LauncherUI", "未安装微信")
     }
 
     private fun checkReadPermissions() {
@@ -224,5 +248,17 @@ class MainActivity : BaseActivity() {
         } else {
             ToastUtils.showShort("请选择excel文件")
         }
+    }
+
+    override fun onBackPressed() {
+        super.onBackPressed()
+    }
+
+    override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
+        if (keyCode == KeyEvent.KEYCODE_BACK && event?.action == KeyEvent.ACTION_DOWN) {
+            moveTaskToBack(true)
+            return true;
+        }
+        return super.onKeyDown(keyCode, event)
     }
 }

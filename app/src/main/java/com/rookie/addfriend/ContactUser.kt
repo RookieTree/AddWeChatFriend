@@ -11,6 +11,6 @@ package com.rookie.addfriend
  */
 data class ContactUser(
     val userPhone: String,
-    val userName: String? = null,
-    val helloWord: String? = null
+    val userName: String? = "",
+    val helloWord: String? = ""
 )
