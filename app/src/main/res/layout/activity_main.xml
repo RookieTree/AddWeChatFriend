@@ -78,6 +78,7 @@
         android:paddingEnd="10dp"
         android:layout_marginBottom="10dp"
         android:orientation="horizontal"
+        android:gravity="center_vertical"
         android:background="@drawable/shape_rect_c10_dedede"
         app:layout_constraintBottom_toBottomOf="@+id/setting_bg"
         app:layout_constraintEnd_toStartOf="@+id/ll_time"
@@ -91,6 +92,7 @@
             android:gravity="center_vertical"
             android:layout_height="wrap_content"
             android:text="周期个数"
+            android:textColor="@color/white"
             app:layout_constraintBottom_toTopOf="@+id/et_count"
             app:layout_constraintStart_toStartOf="@+id/et_count" />
 
@@ -100,8 +102,11 @@
             android:layout_height="wrap_content"
             android:gravity="center"
             android:hint="1"
+            android:textColor="@color/white"
             android:inputType="number"
+            android:textColorHint="@color/white"
             android:textSize="18sp"
+            android:background="@null"
             app:layout_constraintBottom_toTopOf="@+id/btn_read"
             app:layout_constraintStart_toStartOf="parent" />
     </LinearLayout>
@@ -113,6 +118,7 @@
         android:orientation="horizontal"
         android:paddingStart="10dp"
         android:paddingEnd="10dp"
+        android:gravity="center_vertical"
         android:background="@drawable/shape_rect_c10_dedede"
         app:layout_constraintTop_toTopOf="@+id/ll_count"
         app:layout_constraintBottom_toBottomOf="@+id/ll_count"
@@ -126,6 +132,7 @@
             android:gravity="center_vertical"
             android:layout_height="wrap_content"
             android:text="周期时间(秒)"
+            android:textColor="@color/white"
             app:layout_constraintBottom_toTopOf="@+id/et_count"
             app:layout_constraintStart_toStartOf="@+id/et_time" />
 
@@ -135,7 +142,10 @@
             android:layout_height="wrap_content"
             android:gravity="center"
             android:hint="30"
+            android:textColor="@color/white"
+            android:textColorHint="@color/white"
             android:inputType="number"
+            android:background="@null"
             android:textSize="18sp"
             app:layout_constraintBottom_toTopOf="@+id/btn_read"
             app:layout_constraintEnd_toEndOf="parent" />
@@ -152,6 +162,7 @@
         android:id="@+id/iv_setting"
         android:layout_width="25dp"
         android:layout_height="25dp"
+        app:tint="@color/color_4472EA"
         android:layout_marginStart="15dp"
         android:src="@drawable/icon_setting"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -161,19 +172,27 @@
     <Button
         android:id="@+id/btn_read"
         android:layout_width="wrap_content"
-        android:layout_height="50dp"
+        android:layout_height="40dp"
+        android:paddingStart="8dp"
+        android:paddingEnd="8dp"
         android:text="选择本地excel"
         app:layout_constraintTop_toTopOf="@+id/add_bg"
         android:layout_marginEnd="10dp"
+        android:textColor="@color/white"
+        android:background="@drawable/shape_blue_all_c10"
         app:layout_constraintBottom_toBottomOf="@+id/add_bg"
         app:layout_constraintEnd_toStartOf="@+id/btn_add" />
 
     <Button
         android:id="@+id/btn_add"
         android:layout_width="wrap_content"
-        android:layout_height="50dp"
+        android:layout_height="40dp"
         android:text="批量添加好友"
+        android:paddingStart="8dp"
+        android:paddingEnd="8dp"
+        android:textColor="@color/white"
         android:layout_marginEnd="10dp"
+        android:background="@drawable/shape_blue_all_c10"
         app:layout_constraintTop_toTopOf="@+id/add_bg"
         app:layout_constraintBottom_toBottomOf="@+id/add_bg"
         app:layout_constraintEnd_toEndOf="parent" />
