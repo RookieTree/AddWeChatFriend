@@ -86,6 +86,7 @@ class MainActivity : BaseActivity() {
                 showAccessDialog()
             } else {
                 PhoneManager.resetIndex()
+                PhoneManager.startAdd()
                 startWeChat()
             }
         }

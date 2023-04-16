@@ -14,11 +14,11 @@ object PhoneManager {
     const val ADD_COUNT_MAX_DEFAULT = 1
     const val ADD_TIMES_DEFAULT = 30L
 
-    interface IAddChangedListener {
-        fun onAddChanged()
+    interface IAddListener {
+        fun onStartAdd()
     }
 
-    var addListener: IAddChangedListener? = null
+    var addListener: IAddListener? = null
     var currentIndex: Int = 1
 
     //添加朋友频率
@@ -46,9 +46,8 @@ object PhoneManager {
         }
     }
 
-    fun addChange() {
-        currentIndex++
-        addListener?.onAddChanged()
+    fun startAdd() {
+        addListener?.onStartAdd()
     }
 
 }

@@ -32,7 +32,7 @@ import java.lang.ref.WeakReference
  *  @创建时间:  2023/3/17 15:34
  *  @描述：    TODO
  */
-class AddFriendService : AccessibilityService() {
+class AddFriendService : AccessibilityService(), PhoneManager.IAddListener {
 
     companion object {
         const val LAUNCHER_UI = "com.tencent.mm.ui.LauncherUI"  // 首页
@@ -93,6 +93,10 @@ class AddFriendService : AccessibilityService() {
         // 创建Notification渠道，并开启前台服务
         createForegroundNotification()?.let { startForeground(1, it) }
         scheduleHandler = ScheduleHandler(Looper.myLooper()!!, this)
+        PhoneManager.addListener = this
+    }
+
+    override fun onStartAdd() {
         scheduleHandler?.sendEmptyMessageDelayed(ADD_MSG_CODE, PhoneManager.addTimes)
         isStartAdd = true
         showWindow()
