@@ -133,9 +133,9 @@ class MainActivity : BaseActivity() {
             override fun afterTextChanged(s: Editable?) {
                 val time = s?.toString()
                 if (TextUtils.isEmpty(time)){
-                    PhoneManager.addTimes = PhoneManager.ADD_TIMES_DEFAULT * 1000
+                    PhoneManager.addTimes = PhoneManager.ADD_TIMES_DEFAULT
                 }else{
-                    time?.toLong()?.let {
+                    time?.toInt()?.let {
                         checkTime(it)
                     }
                 }
@@ -170,9 +170,9 @@ class MainActivity : BaseActivity() {
         }
     }
 
-    private fun checkTime(time: Long) {
+    private fun checkTime(time: Int) {
         if (time >= PhoneManager.ADD_TIMES_DEFAULT) {
-            PhoneManager.addTimes = time * 1000L
+            PhoneManager.addTimes = time
         } else {
             ToastUtils.showShort("最少30s")
         }

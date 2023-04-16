@@ -81,7 +81,7 @@ class AddFriendService : AccessibilityService(), PhoneManager.IAddListener {
                     addFriendService.isStartAdd = false
                     return
                 }
-                sendEmptyMessageDelayed(ADD_MSG_CODE, PhoneManager.addTimes)
+                sendEmptyMessageDelayed(ADD_MSG_CODE, PhoneManager.addTimes * 1000L)
             }
         }
     }
@@ -97,7 +97,7 @@ class AddFriendService : AccessibilityService(), PhoneManager.IAddListener {
     }
 
     override fun onStartAdd() {
-        scheduleHandler?.sendEmptyMessageDelayed(ADD_MSG_CODE, PhoneManager.addTimes)
+        scheduleHandler?.sendEmptyMessageDelayed(ADD_MSG_CODE, PhoneManager.addTimes * 1000L)
         isStartAdd = true
         showWindow()
     }
