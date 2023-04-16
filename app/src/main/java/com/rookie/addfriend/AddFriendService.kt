@@ -75,7 +75,7 @@ class AddFriendService : AccessibilityService(), PhoneManager.IAddListener {
             if (msg.what == ADD_MSG_CODE) {
                 addFriendService.isStartAdd = true
                 addFriendService.addCount = 0
-                addFriendService.back()
+                addFriendService.refreshTask()
                 //一分钟后继续添加
                 if (PhoneManager.hasAddFinish) {
                     addFriendService.isStartAdd = false
