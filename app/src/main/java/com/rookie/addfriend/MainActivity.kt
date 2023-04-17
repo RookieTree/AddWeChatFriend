@@ -87,7 +87,6 @@ class MainActivity : BaseActivity() {
                 showAccessDialog()
             } else {
                 PhoneManager.resetIndex()
-                PhoneManager.startAdd()
                 startWeChat()
             }
         }
@@ -180,6 +179,7 @@ class MainActivity : BaseActivity() {
 
     private fun startWeChat() {
         startApp("com.tencent.mm", "com.tencent.mm.ui.LauncherUI", "未安装微信")
+        PhoneManager.startAdd()
     }
 
     private fun checkReadPermissions() {

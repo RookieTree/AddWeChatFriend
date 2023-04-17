@@ -18,6 +18,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.WindowManager
 import android.view.accessibility.AccessibilityEvent
+import android.view.accessibility.AccessibilityNodeInfo
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.app.NotificationCompat
@@ -41,7 +42,7 @@ class AddFriendService : AccessibilityService(), PhoneManager.IAddListener {
         const val ADD_CONTACT_USER_UI =
             "com.tencent.mm.plugin.profile.ui.SayHiWithSnsPermissionUI"  // 添加页二级页
         const val ADD_CONTACT_USER_SECOND_UI =
-            "android.widget.LinearLayout"  // 异常ui
+            "android.widget.FrameLayout"  // 异常ui
 
         const val HOME_SEARCH_ICON_ID = "gsl"  // 首页-搜索框图标
         const val HOME_CHAT_TAB_ID = "kd_"  // 首页-微信tab
@@ -54,7 +55,14 @@ class AddFriendService : AccessibilityService(), PhoneManager.IAddListener {
         const val ADD_SEND_ID = "e9q"  // 添加二级页-发送按钮
 
         const val ADD_MSG_CODE = 100
+
+        const val GO_TO_SEARCH = 0
+        const val SEARCH_PHONE = 1
+        const val ADD_CONTACT = 2
+        const val SEND_CONTACT = 3
     }
+
+    private var step = GO_TO_SEARCH
 
     private var overlayView: View? = null
     private var tvIndex: TextView? = null
@@ -75,7 +83,7 @@ class AddFriendService : AccessibilityService(), PhoneManager.IAddListener {
             if (msg.what == ADD_MSG_CODE) {
                 addFriendService.isStartAdd = true
                 addFriendService.addCount = 0
-                addFriendService.refreshTask()
+                addFriendService.back()
                 //一分钟后继续添加
                 if (PhoneManager.hasAddFinish) {
                     addFriendService.isStartAdd = false
@@ -160,7 +168,18 @@ class AddFriendService : AccessibilityService(), PhoneManager.IAddListener {
                     addContactSecondPage(event)
                 }
             }
-        }
+        } else if (event.eventType == AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED){
+            if (ADD_CONTACT_USER_SECOND_UI==event.className.toString()&&step == ADD_CONTACT){
+                rootInActiveWindow?.let {
+                    addContactSecondPage(event)
+//                            fullPrintNode("遍历节点11111", it)
+                }
+            }
+        }  /*else if (event.eventType == AccessibilityEvent.TYPE_VIEW_CLICKED) {
+            rootInActiveWindow?.let {
+                fullPrintNode("遍历节点22222", it)
+            }
+        }*/
     }
 
     override fun onInterrupt() {
@@ -178,6 +197,7 @@ class AddFriendService : AccessibilityService(), PhoneManager.IAddListener {
             tabView?.click()
             //点击搜索图标
             searchView?.click()
+            step = GO_TO_SEARCH
         }
     }
 
@@ -195,6 +215,7 @@ class AddFriendService : AccessibilityService(), PhoneManager.IAddListener {
             )
             gestureClick(searchResult?.parent)
             searchResult.click()
+            step = SEARCH_PHONE
         }
     }
 
@@ -204,28 +225,32 @@ class AddFriendService : AccessibilityService(), PhoneManager.IAddListener {
             return
         }
         event.source?.let { source ->
+            sendRequestFriend(source)
+        }
+    }
+
+    private fun sendRequestFriend(source: AccessibilityNodeInfo) {
+        sleep(200)
+        val sayHiView = source.getNodeById(wxNodeId(ADD_SAYHI_ID))
+        val nameView = source.getNodeById(wxNodeId(ADD_NAME_ID))
+        val sendView = source.getNodeById(wxNodeId(ADD_SEND_ID))
+        PhoneManager.getCurrentUser()?.helloWord?.let {
+            sayHiView?.input(it)
+        }
+        PhoneManager.getCurrentUser()?.userName?.let {
+            nameView?.input(it)
+        }
+        sleep(200)
+        sendView.click()
+//        gestureClick(source.getNodeByText("发送", true)?.parent)
+        step = SEND_CONTACT
+        sleep(500)
+        PhoneManager.currentIndex++
+        refreshTvIndex()
+        addCount++
+        repeat(2) {
+            back()
             sleep(200)
-            val sayHiView = source.getNodeById(wxNodeId(ADD_SAYHI_ID))
-            val nameView = source.getNodeById(wxNodeId(ADD_NAME_ID))
-//            val sendView = source.getNodeById(wxNodeId(ADD_SEND_ID))
-            PhoneManager.getCurrentUser()?.helloWord?.let {
-                sayHiView?.input(it)
-            }
-            PhoneManager.getCurrentUser()?.userName?.let {
-                nameView?.input(it)
-            }
-            sleep(200)
-//            sendView.click()
-            gestureClick(source.getNodeByText("发送", true)?.parent)
-            sleep(500)
-            PhoneManager.currentIndex++
-            refreshTvIndex()
-            addCount++
-//
-            repeat(2) {
-                back()
-                sleep(200)
-            }
         }
     }
 
@@ -246,6 +271,7 @@ class AddFriendService : AccessibilityService(), PhoneManager.IAddListener {
             sleep(200)
             source.getNodeById(wxNodeId(ADD_CONTACT_BUTTON_ID)).click()
             gestureClick(source.getNodeByText("添加到通讯录", true)?.parent)
+            step = ADD_CONTACT
         }
     }
 
