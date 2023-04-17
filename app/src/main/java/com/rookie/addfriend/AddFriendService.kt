@@ -171,7 +171,11 @@ class AddFriendService : AccessibilityService(), PhoneManager.IAddListener {
         } else if (event.eventType == AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED){
             if (ADD_CONTACT_USER_SECOND_UI==event.className.toString()&&step == ADD_CONTACT){
                 rootInActiveWindow?.let {
-                    addContactSecondPage(event)
+                    if (PhoneManager.hasAddFinish) {
+                        logD("hasAddFinish")
+                        return
+                    }
+                    sendRequestFriend(it)
 //                            fullPrintNode("遍历节点11111", it)
                 }
             }
@@ -214,7 +218,7 @@ class AddFriendService : AccessibilityService(), PhoneManager.IAddListener {
                 wxNodeId(HOME_SEARCH_RESULT_ID)
             )
             gestureClick(searchResult?.parent)
-            searchResult.click()
+//            searchResult.click()
             step = SEARCH_PHONE
         }
     }
@@ -230,7 +234,6 @@ class AddFriendService : AccessibilityService(), PhoneManager.IAddListener {
     }
 
     private fun sendRequestFriend(source: AccessibilityNodeInfo) {
-        sleep(200)
         val sayHiView = source.getNodeById(wxNodeId(ADD_SAYHI_ID))
         val nameView = source.getNodeById(wxNodeId(ADD_NAME_ID))
         val sendView = source.getNodeById(wxNodeId(ADD_SEND_ID))
@@ -241,17 +244,20 @@ class AddFriendService : AccessibilityService(), PhoneManager.IAddListener {
             nameView?.input(it)
         }
         sleep(200)
-        sendView.click()
-//        gestureClick(source.getNodeByText("发送", true)?.parent)
-        step = SEND_CONTACT
-        sleep(500)
-        PhoneManager.currentIndex++
-        refreshTvIndex()
-        addCount++
-        repeat(2) {
-            back()
-            sleep(200)
+        sendView?.let {
+            it.click()
+            logD("点击发送了")
+            step = SEND_CONTACT
+            sleep(500)
+            PhoneManager.currentIndex++
+            refreshTvIndex()
+            addCount++
+            repeat(2) {
+                back()
+                sleep(200)
+            }
         }
+//        gestureClick(source.getNodeByText("发送", true)?.parent)
     }
 
     private fun refreshTvIndex() {
@@ -269,9 +275,11 @@ class AddFriendService : AccessibilityService(), PhoneManager.IAddListener {
         }
         event.source?.let { source ->
             sleep(200)
-            source.getNodeById(wxNodeId(ADD_CONTACT_BUTTON_ID)).click()
-            gestureClick(source.getNodeByText("添加到通讯录", true)?.parent)
-            step = ADD_CONTACT
+//            source.getNodeById(wxNodeId(ADD_CONTACT_BUTTON_ID)).click()
+            source.getNodeByText("添加到通讯录", true)?.let {
+                gestureClick(it)
+                step = ADD_CONTACT
+            }
         }
     }
 

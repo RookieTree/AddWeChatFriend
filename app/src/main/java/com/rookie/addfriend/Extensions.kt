@@ -148,6 +148,7 @@ fun AccessibilityNodeInfo.getNodeById(id: String): AccessibilityNodeInfo? {
         sleep(100)
         count++
     }
+    logD("查找组件，id:$id 找不到")
     return null
 }
 
@@ -165,7 +166,6 @@ fun AccessibilityNodeInfo.getNodesById(id: String): List<AccessibilityNodeInfo>?
         sleep(100)
         count++
     }
-    logD("查找组件，id:$id 找不到")
     return null
 }
 
