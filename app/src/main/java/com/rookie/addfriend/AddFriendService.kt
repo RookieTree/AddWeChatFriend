@@ -59,6 +59,7 @@ class AddFriendService : AccessibilityService(), PhoneManager.IAddListener {
         const val CONFIRM_NO_USER = "guw"  // 搜索页-确认无该用户
 
         const val ADD_MSG_CODE = 100
+        const val ADD_MSG_CODE_TWO = 101
 
         const val GO_TO_SEARCH = 0
         const val SEARCH_PHONE = 1
@@ -83,16 +84,22 @@ class AddFriendService : AccessibilityService(), PhoneManager.IAddListener {
         override fun handleMessage(msg: Message) {
             val addFriendService = weakReference.get() ?: return
             logD("ScheduleHandler service listening:$addFriendService")
-            if (msg.what == ADD_MSG_CODE) {
-                if (PhoneManager.hasAddFinish) {
-                    addFriendService.isStartAdd = false
-                    return
-                }
-                addFriendService.isStartAdd = true
-                addFriendService.back()
-                //安保机制
-                sendEmptyMessageDelayed(ADD_MSG_CODE, PhoneManager.addTimes * 1000L * 2)
+            if (PhoneManager.hasAddFinish) {
+                addFriendService.isStartAdd = false
+                return
             }
+            addFriendService.isStartAdd = true
+            addFriendService.back()
+            if (msg.what == ADD_MSG_CODE) {
+                addFriendService.back()
+
+            } else if (msg.what == ADD_MSG_CODE_TWO) {
+                repeat(2) {
+                    addFriendService.back()
+                }
+            }
+            // 安保机制
+            // sendEmptyMessageDelayed(ADD_MSG_CODE, PhoneManager.addTimes * 1000L * 2)
         }
     }
 
@@ -109,12 +116,11 @@ class AddFriendService : AccessibilityService(), PhoneManager.IAddListener {
     override fun onStartAdd() {
         isStartAdd = true
         showWindow()
-        startAddDelay()
     }
 
-    private fun startAddDelay() {
-        scheduleHandler?.removeMessages(ADD_MSG_CODE)
-        scheduleHandler?.sendEmptyMessageDelayed(ADD_MSG_CODE, PhoneManager.addTimes * 1000L)
+    private fun startAddDelay(msgCode:Int) {
+        scheduleHandler?.removeMessages(msgCode)
+        scheduleHandler?.sendEmptyMessageDelayed(msgCode, PhoneManager.addTimes * 1000L)
     }
 
     private fun showWindow() {
@@ -170,7 +176,7 @@ class AddFriendService : AccessibilityService(), PhoneManager.IAddListener {
                         //防止短时间内进来两次
                         if (System.currentTimeMillis() - lastTime > 100) {
                             lastTime = System.currentTimeMillis()
-                            dealFailContact()
+                            dealFailContact(ADD_MSG_CODE_TWO)
                             back()
                         }
                     }
@@ -205,7 +211,7 @@ class AddFriendService : AccessibilityService(), PhoneManager.IAddListener {
 
     }
 
-    private fun dealFailContact() {
+    private fun dealFailContact(msgCode: Int) {
         logD("dealFailContact,${PhoneManager.getCurrentUser()?.userName}")
         PhoneManager.getCurrentUser()?.let {
             PhoneManager.contactFailList.add(it)
@@ -213,7 +219,7 @@ class AddFriendService : AccessibilityService(), PhoneManager.IAddListener {
         PhoneManager.currentIndex++
         isStartAdd = false
         refreshTvIndex()
-        startAddDelay()
+        startAddDelay(msgCode)
     }
 
     private fun gotoSearch(event: AccessibilityEvent) {
@@ -242,9 +248,9 @@ class AddFriendService : AccessibilityService(), PhoneManager.IAddListener {
             sleep(200)
             val searchResult = source.getNodeById(
                 wxNodeId(HOME_SEARCH_RESULT_ID)
-            ) ?: return
-            searchResult.click()
-//            gestureClick(searchResult)
+            )
+//            searchResult.click()
+            gestureClick(searchResult?.parent)
             step = SEARCH_PHONE
         }
     }
@@ -277,7 +283,7 @@ class AddFriendService : AccessibilityService(), PhoneManager.IAddListener {
         PhoneManager.currentIndex++
         refreshTvIndex()
         isStartAdd = false
-        startAddDelay()
+        startAddDelay(ADD_MSG_CODE_TWO)
         repeat(2) {
             back()
             sleep(200)
@@ -305,8 +311,7 @@ class AddFriendService : AccessibilityService(), PhoneManager.IAddListener {
 //            source.getNodeById(wxNodeId(ADD_CONTACT_BUTTON_ID)).click()
             val addContactView = source.getNodeByText("添加到通讯录", true)
             if (addContactView == null) {
-                dealFailContact()
-                back()
+                dealFailContact(ADD_MSG_CODE_TWO)
             } else {
                 gestureClick(addContactView.parent)
                 step = ADD_CONTACT
@@ -347,6 +352,7 @@ class AddFriendService : AccessibilityService(), PhoneManager.IAddListener {
     override fun onDestroy() {
         stopForeground(true)
         mWindowManager?.removeView(overlayView)
+        scheduleHandler?.removeCallbacksAndMessages(null)
         super.onDestroy()
     }
 
