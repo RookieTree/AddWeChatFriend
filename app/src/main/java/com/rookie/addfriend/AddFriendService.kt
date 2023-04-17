@@ -126,14 +126,14 @@ class AddFriendService : AccessibilityService(), PhoneManager.IAddListener {
                         or WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
                 )
         val params = WindowManager.LayoutParams(
-            WindowManager.LayoutParams.MATCH_PARENT,
+            WindowManager.LayoutParams.WRAP_CONTENT,
             WindowManager.LayoutParams.WRAP_CONTENT,
             WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
             flag,
             PixelFormat.TRANSLUCENT
         )
         // 设置窗口布局的位置和大小
-        params.gravity = Gravity.CENTER_VERTICAL or Gravity.END
+        params.gravity = Gravity.BOTTOM or Gravity.END
         // 将悬浮窗口 View 添加到 WindowManager 中
         mWindowManager?.addView(overlayView, params)
         refreshTvIndex()
@@ -168,8 +168,8 @@ class AddFriendService : AccessibilityService(), PhoneManager.IAddListener {
                     addContactSecondPage(event)
                 }
             }
-        } else if (event.eventType == AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED){
-            if (ADD_CONTACT_USER_SECOND_UI==event.className.toString()&&step == ADD_CONTACT){
+        } else if (event.eventType == AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED) {
+            if (ADD_CONTACT_USER_SECOND_UI == event.className.toString() && step == ADD_CONTACT) {
                 rootInActiveWindow?.let {
                     if (PhoneManager.hasAddFinish) {
                         logD("hasAddFinish")
@@ -277,7 +277,7 @@ class AddFriendService : AccessibilityService(), PhoneManager.IAddListener {
             sleep(200)
 //            source.getNodeById(wxNodeId(ADD_CONTACT_BUTTON_ID)).click()
             source.getNodeByText("添加到通讯录", true)?.let {
-                gestureClick(it)
+                gestureClick(it.parent)
                 step = ADD_CONTACT
             }
         }
