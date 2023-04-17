@@ -111,31 +111,33 @@ class AddFriendService : AccessibilityService(), PhoneManager.IAddListener {
     }
 
     private fun showWindow() {
-        // 获取 WindowManager
-        mWindowManager = getSystemService(WINDOW_SERVICE) as WindowManager
-        // 创建一个悬浮窗口 View
-        overlayView = (getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater).inflate(
-            R.layout.float_app_view,
-            null
-        ) as ConstraintLayout
-        tvIndex = overlayView?.findViewById(R.id.tv_index)
-        // 设置悬浮窗口参数
-        val flag = (
-                WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
-                        or WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or WindowManager.LayoutParams.FLAG_LAYOUT_INSET_DECOR
-                        or WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
-                )
-        val params = WindowManager.LayoutParams(
-            WindowManager.LayoutParams.WRAP_CONTENT,
-            WindowManager.LayoutParams.WRAP_CONTENT,
-            WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
-            flag,
-            PixelFormat.TRANSLUCENT
-        )
-        // 设置窗口布局的位置和大小
-        params.gravity = Gravity.BOTTOM or Gravity.END
-        // 将悬浮窗口 View 添加到 WindowManager 中
-        mWindowManager?.addView(overlayView, params)
+        if (mWindowManager==null){
+            // 获取 WindowManager
+            mWindowManager = getSystemService(WINDOW_SERVICE) as WindowManager
+            // 创建一个悬浮窗口 View
+            overlayView = (getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater).inflate(
+                R.layout.float_app_view,
+                null
+            ) as ConstraintLayout
+            tvIndex = overlayView?.findViewById(R.id.tv_index)
+            // 设置悬浮窗口参数
+            val flag = (
+                    WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
+                            or WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or WindowManager.LayoutParams.FLAG_LAYOUT_INSET_DECOR
+                            or WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
+                    )
+            val params = WindowManager.LayoutParams(
+                WindowManager.LayoutParams.WRAP_CONTENT,
+                WindowManager.LayoutParams.WRAP_CONTENT,
+                WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
+                flag,
+                PixelFormat.TRANSLUCENT
+            )
+            // 设置窗口布局的位置和大小
+            params.gravity = Gravity.BOTTOM or Gravity.END
+            // 将悬浮窗口 View 添加到 WindowManager 中
+            mWindowManager?.addView(overlayView, params)
+        }
         refreshTvIndex()
     }
 
@@ -195,12 +197,12 @@ class AddFriendService : AccessibilityService(), PhoneManager.IAddListener {
             return
         }
         event.source?.let { source ->
-            val tabView = source.getNodeById(wxNodeId(HOME_CHAT_TAB_ID))
-            val searchView = source.getNodeById(wxNodeId(HOME_SEARCH_ICON_ID))
+            val tabView = source.getNodeById(wxNodeId(HOME_CHAT_TAB_ID)) ?: return
+            val searchView = source.getNodeById(wxNodeId(HOME_SEARCH_ICON_ID)) ?: return
             //先点到微信tab
-            tabView?.click()
+            tabView.click()
             //点击搜索图标
-            searchView?.click()
+            searchView.click()
             step = GO_TO_SEARCH
         }
     }
@@ -211,13 +213,13 @@ class AddFriendService : AccessibilityService(), PhoneManager.IAddListener {
         }
         event.source?.let { source ->
             //让搜索框输入
-            val editView = source.getNodeById(wxNodeId(HOME_SEARCH_EDIT_ID))
-            PhoneManager.getCurrentUser()?.let { editView?.input(it.userPhone) }
+            val editView = source.getNodeById(wxNodeId(HOME_SEARCH_EDIT_ID)) ?: return
+            PhoneManager.getCurrentUser()?.let { editView.input(it.userPhone) }
             sleep(200)
             val searchResult = source.getNodeById(
                 wxNodeId(HOME_SEARCH_RESULT_ID)
-            )
-            gestureClick(searchResult?.parent)
+            ) ?: return
+            gestureClick(searchResult)
 //            searchResult.click()
             step = SEARCH_PHONE
         }
@@ -234,28 +236,26 @@ class AddFriendService : AccessibilityService(), PhoneManager.IAddListener {
     }
 
     private fun sendRequestFriend(source: AccessibilityNodeInfo) {
-        val sayHiView = source.getNodeById(wxNodeId(ADD_SAYHI_ID))
-        val nameView = source.getNodeById(wxNodeId(ADD_NAME_ID))
-        val sendView = source.getNodeById(wxNodeId(ADD_SEND_ID))
+        val sayHiView = source.getNodeById(wxNodeId(ADD_SAYHI_ID)) ?: return
+        val nameView = source.getNodeById(wxNodeId(ADD_NAME_ID)) ?: return
+        val sendView = source.getNodeById(wxNodeId(ADD_SEND_ID)) ?: return
         PhoneManager.getCurrentUser()?.helloWord?.let {
-            sayHiView?.input(it)
+            sayHiView.input(it)
         }
         PhoneManager.getCurrentUser()?.userName?.let {
-            nameView?.input(it)
+            nameView.input(it)
         }
         sleep(200)
-        sendView?.let {
-            it.click()
-            logD("点击发送了")
-            step = SEND_CONTACT
-            sleep(500)
-            PhoneManager.currentIndex++
-            refreshTvIndex()
-            addCount++
-            repeat(2) {
-                back()
-                sleep(200)
-            }
+        sendView.click()
+        logD("点击发送了")
+        step = SEND_CONTACT
+        sleep(200)
+        PhoneManager.currentIndex++
+        refreshTvIndex()
+        addCount++
+        repeat(2) {
+            back()
+            sleep(200)
         }
 //        gestureClick(source.getNodeByText("发送", true)?.parent)
     }
