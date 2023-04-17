@@ -91,7 +91,7 @@ class AddFriendService : AccessibilityService(), PhoneManager.IAddListener {
                 addFriendService.isStartAdd = true
                 addFriendService.back()
                 //安保机制
-//                sendEmptyMessageDelayed(ADD_MSG_CODE, PhoneManager.addTimes * 1000L * 2)
+                sendEmptyMessageDelayed(ADD_MSG_CODE, PhoneManager.addTimes * 1000L * 2)
             }
         }
     }
@@ -109,6 +109,7 @@ class AddFriendService : AccessibilityService(), PhoneManager.IAddListener {
     override fun onStartAdd() {
         isStartAdd = true
         showWindow()
+        startAddDelay()
     }
 
     private fun startAddDelay() {
