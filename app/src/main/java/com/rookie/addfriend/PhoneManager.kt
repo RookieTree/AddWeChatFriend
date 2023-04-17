@@ -11,8 +11,8 @@ package com.rookie.addfriend
  */
 object PhoneManager {
 
-    const val ADD_COUNT_MAX_DEFAULT = 1
-    const val ADD_TIMES_DEFAULT = 30
+    //默认10s
+    const val ADD_TIMES_DEFAULT = 10
 
     interface IAddListener {
         fun onStartAdd()
@@ -23,9 +23,6 @@ object PhoneManager {
 
     //添加朋友频率
     var addTimes = ADD_TIMES_DEFAULT
-
-    //周期内添加好友数
-    var addCountMax = ADD_COUNT_MAX_DEFAULT
 
     var contactList = mutableListOf<ContactUser>()
 

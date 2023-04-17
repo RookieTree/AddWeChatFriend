@@ -100,59 +100,18 @@
         app:layout_constraintTop_toTopOf="@+id/setting_bg" />
 
     <LinearLayout
-        android:id="@+id/ll_count"
-        android:layout_width="150dp"
-        android:layout_height="50dp"
-        android:paddingStart="10dp"
-        android:paddingEnd="10dp"
-        android:layout_marginBottom="10dp"
-        android:orientation="horizontal"
-        android:gravity="center_vertical"
-        android:background="@drawable/shape_rect_c10_dedede"
-        app:layout_constraintBottom_toBottomOf="@+id/setting_bg"
-        app:layout_constraintEnd_toStartOf="@+id/ll_time"
-        app:layout_constraintHorizontal_chainStyle="spread"
-        app:layout_constraintStart_toStartOf="parent">
-
-        <TextView
-            android:id="@+id/tv_count"
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:gravity="center_vertical"
-            android:layout_height="wrap_content"
-            android:text="周期个数"
-            android:textColor="@color/white"
-            app:layout_constraintBottom_toTopOf="@+id/et_count"
-            app:layout_constraintStart_toStartOf="@+id/et_count" />
-
-        <EditText
-            android:id="@+id/et_count"
-            android:layout_width="50dp"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:hint="1"
-            android:textColor="@color/white"
-            android:inputType="number"
-            android:textColorHint="@color/white"
-            android:textSize="18sp"
-            android:background="@null"
-            app:layout_constraintBottom_toTopOf="@+id/btn_read"
-            app:layout_constraintStart_toStartOf="parent" />
-    </LinearLayout>
-
-    <LinearLayout
         android:id="@+id/ll_time"
-        android:layout_width="150dp"
-        android:layout_height="50dp"
+        android:layout_width="wrap_content"
+        android:layout_height="40dp"
         android:orientation="horizontal"
         android:paddingStart="10dp"
         android:paddingEnd="10dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginStart="10dp"
         android:gravity="center_vertical"
         android:background="@drawable/shape_rect_c10_dedede"
-        app:layout_constraintTop_toTopOf="@+id/ll_count"
-        app:layout_constraintBottom_toBottomOf="@+id/ll_count"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/ll_count">
+        app:layout_constraintTop_toBottomOf="@+id/tv_setting"
+        app:layout_constraintStart_toStartOf="parent">
 
         <TextView
             android:id="@+id/tv_time"
@@ -160,7 +119,7 @@
             android:layout_weight="1"
             android:gravity="center_vertical"
             android:layout_height="wrap_content"
-            android:text="周期时间(秒)"
+            android:text="添加间隔时间(秒)"
             android:textColor="@color/white"
             app:layout_constraintBottom_toTopOf="@+id/et_count"
             app:layout_constraintStart_toStartOf="@+id/et_time" />
@@ -170,7 +129,7 @@
             android:layout_width="50dp"
             android:layout_height="wrap_content"
             android:gravity="center"
-            android:hint="30"
+            android:hint="10"
             android:textColor="@color/white"
             android:textColorHint="@color/white"
             android:inputType="number"

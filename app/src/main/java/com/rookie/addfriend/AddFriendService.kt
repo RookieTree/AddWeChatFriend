@@ -77,9 +77,6 @@ class AddFriendService : AccessibilityService(), PhoneManager.IAddListener {
     //是否开始添加好友
     var isStartAdd = false
 
-    //添加好友的次数
-    var addCount = 0
-
     class ScheduleHandler constructor(looper: Looper, addFriendService: AddFriendService) :
         Handler(looper) {
         private val weakReference = WeakReference(addFriendService)
@@ -87,15 +84,14 @@ class AddFriendService : AccessibilityService(), PhoneManager.IAddListener {
             val addFriendService = weakReference.get() ?: return
             logD("ScheduleHandler service listening:$addFriendService")
             if (msg.what == ADD_MSG_CODE) {
-                addFriendService.isStartAdd = true
-                addFriendService.addCount = 0
-                //一分钟后继续添加
                 if (PhoneManager.hasAddFinish) {
                     addFriendService.isStartAdd = false
                     return
                 }
+                addFriendService.isStartAdd = true
                 addFriendService.back()
-                sendEmptyMessageDelayed(ADD_MSG_CODE, PhoneManager.addTimes * 1000L)
+                //安保机制
+//                sendEmptyMessageDelayed(ADD_MSG_CODE, PhoneManager.addTimes * 1000L * 2)
             }
         }
     }
@@ -111,9 +107,13 @@ class AddFriendService : AccessibilityService(), PhoneManager.IAddListener {
     }
 
     override fun onStartAdd() {
-        scheduleHandler?.sendEmptyMessageDelayed(ADD_MSG_CODE, PhoneManager.addTimes * 1000L)
         isStartAdd = true
         showWindow()
+    }
+
+    private fun startAddDelay() {
+        scheduleHandler?.removeMessages(ADD_MSG_CODE)
+        scheduleHandler?.sendEmptyMessageDelayed(ADD_MSG_CODE, PhoneManager.addTimes * 1000L)
     }
 
     private fun showWindow() {
@@ -153,11 +153,6 @@ class AddFriendService : AccessibilityService(), PhoneManager.IAddListener {
      */
     override fun onAccessibilityEvent(event: AccessibilityEvent?) {
         if (event == null || !isStartAdd) {
-            return
-        }
-        //如果大于单次添加最大值，就停止
-        if (addCount >= PhoneManager.addCountMax) {
-            isStartAdd = false
             return
         }
         logD("event_name:$event")
@@ -210,11 +205,14 @@ class AddFriendService : AccessibilityService(), PhoneManager.IAddListener {
     }
 
     private fun dealFailContact() {
+        logD("dealFailContact,${PhoneManager.getCurrentUser()?.userName}")
         PhoneManager.getCurrentUser()?.let {
             PhoneManager.contactFailList.add(it)
         }
         PhoneManager.currentIndex++
+        isStartAdd = false
         refreshTvIndex()
+        startAddDelay()
     }
 
     private fun gotoSearch(event: AccessibilityEvent) {
@@ -244,7 +242,8 @@ class AddFriendService : AccessibilityService(), PhoneManager.IAddListener {
             val searchResult = source.getNodeById(
                 wxNodeId(HOME_SEARCH_RESULT_ID)
             ) ?: return
-            gestureClick(searchResult)
+            searchResult.click()
+//            gestureClick(searchResult)
             step = SEARCH_PHONE
         }
     }
@@ -276,7 +275,8 @@ class AddFriendService : AccessibilityService(), PhoneManager.IAddListener {
         sleep(200)
         PhoneManager.currentIndex++
         refreshTvIndex()
-        addCount++
+        isStartAdd = false
+        startAddDelay()
         repeat(2) {
             back()
             sleep(200)

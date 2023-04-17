@@ -57,7 +57,6 @@ class MainActivity : BaseActivity() {
     private lateinit var rv: RecyclerView
     private lateinit var rvError: RecyclerView
     private lateinit var etTime: EditText
-    private lateinit var etCount: EditText
     private lateinit var progress: ContentLoadingProgressBar
     private lateinit var tvTotal: TextView
     private lateinit var ivSetting: ImageView
@@ -102,7 +101,6 @@ class MainActivity : BaseActivity() {
         rv = findViewById(R.id.rv)
         rvError = findViewById(R.id.rv_error)
         etTime = findViewById(R.id.et_time)
-        etCount = findViewById(R.id.et_count)
         progress = findViewById(R.id.progress)
         tvTotal = findViewById(R.id.tv_total)
         ivSetting = findViewById(R.id.iv_setting)
@@ -149,39 +147,13 @@ class MainActivity : BaseActivity() {
             }
 
         })
-        etCount.addTextChangedListener(object : TextWatcher {
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
-            }
-
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-            }
-
-            override fun afterTextChanged(s: Editable?) {
-                val count = s?.toString()
-                if (TextUtils.isEmpty(count)) {
-                    PhoneManager.addCountMax = PhoneManager.ADD_COUNT_MAX_DEFAULT
-                } else {
-                    count?.toInt()?.let {
-                        checkCount(it)
-                    }
-                }
-            }
-        })
-    }
-
-    private fun checkCount(count: Int) {
-        if (count >= PhoneManager.ADD_COUNT_MAX_DEFAULT) {
-            PhoneManager.addCountMax = count
-        } else {
-            ToastUtils.showShort("最少1个")
-        }
     }
 
     private fun checkTime(time: Int) {
         if (time >= PhoneManager.ADD_TIMES_DEFAULT) {
             PhoneManager.addTimes = time
         } else {
-            ToastUtils.showShort("最少30s")
+            ToastUtils.showShort("最少10s")
         }
     }
 
@@ -267,10 +239,6 @@ class MainActivity : BaseActivity() {
         } else {
             ToastUtils.showShort("请选择excel文件")
         }
-    }
-
-    override fun onBackPressed() {
-        super.onBackPressed()
     }
 
     override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
