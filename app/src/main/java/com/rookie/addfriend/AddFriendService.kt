@@ -44,6 +44,8 @@ class AddFriendService : AccessibilityService(), PhoneManager.IAddListener {
             "com.tencent.mm.plugin.profile.ui.SayHiWithSnsPermissionUI"  // 添加页二级页
         const val ADD_CONTACT_USER_SECOND_UI =
             "android.widget.FrameLayout"  // 异常ui
+        const val SEARCH_ERROR_UI =
+            "qo3.g"  // 未找到该用户
 
         const val HOME_SEARCH_ICON_ID = "gsl"  // 首页-搜索框图标
         const val HOME_CHAT_TAB_ID = "kd_"  // 首页-微信tab
@@ -54,6 +56,7 @@ class AddFriendService : AccessibilityService(), PhoneManager.IAddListener {
         const val ADD_SAYHI_ID = "j0w"  // 申请消息
         const val ADD_NAME_ID = "j0z"  // 备注edit
         const val ADD_SEND_ID = "e9q"  // 添加二级页-发送按钮
+        const val CONFIRM_NO_USER = "guw"  // 搜索页-确认无该用户
 
         const val ADD_MSG_CODE = 100
 
@@ -84,19 +87,18 @@ class AddFriendService : AccessibilityService(), PhoneManager.IAddListener {
             if (msg.what == ADD_MSG_CODE) {
                 addFriendService.isStartAdd = true
                 addFriendService.addCount = 0
-                addFriendService.back()
                 //一分钟后继续添加
                 if (PhoneManager.hasAddFinish) {
                     addFriendService.isStartAdd = false
                     return
                 }
+                addFriendService.back()
                 sendEmptyMessageDelayed(ADD_MSG_CODE, PhoneManager.addTimes * 1000L)
             }
         }
     }
 
     private var scheduleHandler: ScheduleHandler? = null
-    private var currEvent:AccessibilityEvent?=null
 
     override fun onCreate() {
         super.onCreate()
@@ -113,14 +115,15 @@ class AddFriendService : AccessibilityService(), PhoneManager.IAddListener {
     }
 
     private fun showWindow() {
-        if (mWindowManager==null){
+        if (mWindowManager == null) {
             // 获取 WindowManager
             mWindowManager = getSystemService(WINDOW_SERVICE) as WindowManager
             // 创建一个悬浮窗口 View
-            overlayView = (getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater).inflate(
-                R.layout.float_app_view,
-                null
-            ) as ConstraintLayout
+            overlayView =
+                (getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater).inflate(
+                    R.layout.float_app_view,
+                    null
+                ) as ConstraintLayout
             tvIndex = overlayView?.findViewById(R.id.tv_index)
             // 设置悬浮窗口参数
             val flag = (
@@ -157,13 +160,18 @@ class AddFriendService : AccessibilityService(), PhoneManager.IAddListener {
         }
         logD("event_name:$event")
         if (event.eventType == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) {
-            currEvent=event
             when (event.className.toString()) {
                 LAUNCHER_UI -> {
                     gotoSearch(event)
                 }
                 SEARCH_UI -> {
                     searchPhone(event)
+                }
+                SEARCH_ERROR_UI -> {
+                    if (event.text.contains("用户不存在")) {
+                        dealFailContact()
+                        back()
+                    }
                 }
                 CONTACT_USER_UI -> {
                     //点击添加通讯录
@@ -181,7 +189,7 @@ class AddFriendService : AccessibilityService(), PhoneManager.IAddListener {
                         return
                     }
                     sendRequestFriend(it)
-//                            fullPrintNode("遍历节点11111", it)
+//                  fullPrintNode("遍历节点11111", it)
                 }
             }
         }  /*else if (event.eventType == AccessibilityEvent.TYPE_VIEW_CLICKED) {
@@ -193,6 +201,14 @@ class AddFriendService : AccessibilityService(), PhoneManager.IAddListener {
 
     override fun onInterrupt() {
 
+    }
+
+    private fun dealFailContact() {
+        PhoneManager.getCurrentUser()?.let {
+            PhoneManager.contactFailList.add(it)
+        }
+        PhoneManager.currentIndex++
+        refreshTvIndex()
     }
 
     private fun gotoSearch(event: AccessibilityEvent) {
@@ -216,14 +232,13 @@ class AddFriendService : AccessibilityService(), PhoneManager.IAddListener {
         }
         event.source?.let { source ->
             //让搜索框输入
-            val editView = source.getNodeById(wxNodeId(HOME_SEARCH_EDIT_ID)) ?: return
-            PhoneManager.getCurrentUser()?.let { editView.input(it.userPhone) }
+            val editView = source.getNodeById(wxNodeId(HOME_SEARCH_EDIT_ID))
+            PhoneManager.getCurrentUser()?.let { editView?.input(it.userPhone) }
             sleep(200)
             val searchResult = source.getNodeById(
                 wxNodeId(HOME_SEARCH_RESULT_ID)
             ) ?: return
             gestureClick(searchResult)
-//            searchResult.click()
             step = SEARCH_PHONE
         }
     }
@@ -265,11 +280,12 @@ class AddFriendService : AccessibilityService(), PhoneManager.IAddListener {
 
     private fun refreshTvIndex() {
         if (PhoneManager.hasAddFinish) {
-            tvIndex?.text = "已添加完"
+            tvIndex?.text = "已添加完\n" +
+                    "添加失败个数:${PhoneManager.contactFailList.size}"
         } else {
             tvIndex?.text =
-                "正在添加${PhoneManager.currentIndex}/${PhoneManager.contactList.size - 1}位好友\n请勿操作手机\n" +
-                        "event:${currEvent?.className}"
+                "正在添加${PhoneManager.currentIndex}/${PhoneManager.contactList.size - 1}位好友\n" +
+                        "添加失败个数:${PhoneManager.contactFailList.size}\n请勿操作手机"
         }
     }
 
@@ -277,12 +293,15 @@ class AddFriendService : AccessibilityService(), PhoneManager.IAddListener {
         if (PhoneManager.hasAddFinish) {
             return
         }
-        refreshTvIndex()
         event.source?.let { source ->
             sleep(200)
 //            source.getNodeById(wxNodeId(ADD_CONTACT_BUTTON_ID)).click()
-            source.getNodeByText("添加到通讯录", true)?.let {
-                gestureClick(it.parent)
+            val addContactView = source.getNodeByText("添加到通讯录", true)
+            if (addContactView == null) {
+                dealFailContact()
+                back()
+            } else {
+                gestureClick(addContactView.parent)
                 step = ADD_CONTACT
             }
         }

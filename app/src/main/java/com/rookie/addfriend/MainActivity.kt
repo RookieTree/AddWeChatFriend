@@ -53,7 +53,9 @@ class MainActivity : BaseActivity() {
 
     private lateinit var btnAdd: Button
     private lateinit var btnRead: Button
+    private lateinit var tvError: TextView
     private lateinit var rv: RecyclerView
+    private lateinit var rvError: RecyclerView
     private lateinit var etTime: EditText
     private lateinit var etCount: EditText
     private lateinit var progress: ContentLoadingProgressBar
@@ -62,6 +64,7 @@ class MainActivity : BaseActivity() {
     private lateinit var activityResultLauncher: ActivityResultLauncher<Intent>
     private var dialog: Dialog? = null
     var contactAdapter: ContactAdapter? = null
+    var contactErrorAdapter: ContactAdapter? = null
     private var readRequest: PermissionsRequester? = null
     private var systemAlertRequest: PermissionsRequester? = null
 
@@ -95,7 +98,9 @@ class MainActivity : BaseActivity() {
     override fun init() {
         btnRead = findViewById(R.id.btn_read)
         btnAdd = findViewById(R.id.btn_add)
+        tvError = findViewById(R.id.tv_error)
         rv = findViewById(R.id.rv)
+        rvError = findViewById(R.id.rv_error)
         etTime = findViewById(R.id.et_time)
         etCount = findViewById(R.id.et_count)
         progress = findViewById(R.id.progress)
@@ -110,8 +115,11 @@ class MainActivity : BaseActivity() {
             }
         }
         rv.layoutManager = LinearLayoutManager(this)
+        rvError.layoutManager = LinearLayoutManager(this)
         contactAdapter = ContactAdapter()
+        contactErrorAdapter = ContactAdapter()
         rv.adapter = contactAdapter
+        rvError.adapter = contactErrorAdapter
         btnRead.setOnClickListener {
             checkReadPermissions()
         }
@@ -131,9 +139,9 @@ class MainActivity : BaseActivity() {
 
             override fun afterTextChanged(s: Editable?) {
                 val time = s?.toString()
-                if (TextUtils.isEmpty(time)){
+                if (TextUtils.isEmpty(time)) {
                     PhoneManager.addTimes = PhoneManager.ADD_TIMES_DEFAULT
-                }else{
+                } else {
                     time?.toInt()?.let {
                         checkTime(it)
                     }
@@ -150,9 +158,9 @@ class MainActivity : BaseActivity() {
 
             override fun afterTextChanged(s: Editable?) {
                 val count = s?.toString()
-                if (TextUtils.isEmpty(count)){
-                    PhoneManager.addCountMax=PhoneManager.ADD_COUNT_MAX_DEFAULT
-                }else{
+                if (TextUtils.isEmpty(count)) {
+                    PhoneManager.addCountMax = PhoneManager.ADD_COUNT_MAX_DEFAULT
+                } else {
                     count?.toInt()?.let {
                         checkCount(it)
                     }
@@ -210,6 +218,15 @@ class MainActivity : BaseActivity() {
         if (isAccessibilitySettingsOn(AddFriendService::class.java)) {
             dialog?.dismiss()
         }
+        if (PhoneManager.contactFailList.isNotEmpty()) {
+            tvError.visibility = View.VISIBLE
+            rvError.visibility = View.VISIBLE
+            contactErrorAdapter?.setList(PhoneManager.contactFailList)
+        } else {
+            tvError.visibility = View.GONE
+            rvError.visibility = View.GONE
+        }
+
     }
 
     private fun showAccessDialog() {
@@ -242,7 +259,7 @@ class MainActivity : BaseActivity() {
                 contacts.let {
                     PhoneManager.contactList.clear()
                     PhoneManager.contactList.addAll(it)
-                    contactAdapter?.setNewInstance(PhoneManager.contactList)
+                    contactAdapter?.setList(PhoneManager.contactList)
                     tvTotal.text = "好友总数量: ${PhoneManager.contactList.size - 1}"
                     progress.visibility = View.GONE
                 }

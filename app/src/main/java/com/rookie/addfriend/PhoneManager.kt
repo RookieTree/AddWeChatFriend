@@ -29,6 +29,8 @@ object PhoneManager {
 
     var contactList = mutableListOf<ContactUser>()
 
+    var contactFailList = mutableListOf<ContactUser>()
+
     val hasAddFinish: Boolean
         get() {
             return currentIndex >= contactList.size

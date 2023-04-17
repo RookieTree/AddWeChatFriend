@@ -40,16 +40,45 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rv"
+    <LinearLayout
+        android:layout_margin="10dp"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_margin="10dp"
+        android:orientation="vertical"
         android:background="@drawable/shape_white_c10"
         app:layout_constraintBottom_toTopOf="@+id/add_bg"
         app:layout_constraintTop_toBottomOf="@+id/title_bg"
         app:layout_constraintVertical_bias="0.6"
-        tools:layout_editor_absoluteX="10dp" />
+        tools:layout_editor_absoluteX="10dp">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rv"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="2" />
+
+        <TextView
+            android:id="@+id/tv_error"
+            android:text="添加失败的用户"
+            android:layout_marginStart="10dp"
+            android:textSize="18sp"
+            android:visibility="gone"
+            tools:visibility="visible"
+            android:layout_marginTop="5dp"
+            android:textColor="@color/black"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rv_error"
+            android:visibility="gone"
+            tools:visibility="visible"
+            android:layout_marginTop="5dp"
+            android:layout_weight="1"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:background="@drawable/shape_white_c10" />
+    </LinearLayout>
 
     <View
         android:id="@+id/setting_bg"
