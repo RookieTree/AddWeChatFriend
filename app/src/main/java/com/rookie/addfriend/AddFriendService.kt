@@ -22,6 +22,7 @@ import android.view.accessibility.AccessibilityNodeInfo
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.app.NotificationCompat
+import com.blankj.utilcode.util.ToastUtils
 import java.lang.ref.WeakReference
 
 
@@ -94,7 +95,8 @@ class AddFriendService : AccessibilityService(), PhoneManager.IAddListener {
         }
     }
 
-    var scheduleHandler: ScheduleHandler? = null
+    private var scheduleHandler: ScheduleHandler? = null
+    private var currEvent:AccessibilityEvent?=null
 
     override fun onCreate() {
         super.onCreate()
@@ -155,6 +157,7 @@ class AddFriendService : AccessibilityService(), PhoneManager.IAddListener {
         }
         logD("event_name:$event")
         if (event.eventType == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) {
+            currEvent=event
             when (event.className.toString()) {
                 LAUNCHER_UI -> {
                     gotoSearch(event)
@@ -265,7 +268,8 @@ class AddFriendService : AccessibilityService(), PhoneManager.IAddListener {
             tvIndex?.text = "已添加完"
         } else {
             tvIndex?.text =
-                "正在添加${PhoneManager.currentIndex}/${PhoneManager.contactList.size - 1}位好友\n请勿操作手机"
+                "正在添加${PhoneManager.currentIndex}/${PhoneManager.contactList.size - 1}位好友\n请勿操作手机\n" +
+                        "event:${currEvent?.className}"
         }
     }
 
@@ -273,6 +277,7 @@ class AddFriendService : AccessibilityService(), PhoneManager.IAddListener {
         if (PhoneManager.hasAddFinish) {
             return
         }
+        refreshTvIndex()
         event.source?.let { source ->
             sleep(200)
 //            source.getNodeById(wxNodeId(ADD_CONTACT_BUTTON_ID)).click()
