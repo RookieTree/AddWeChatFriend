@@ -202,5 +202,5 @@
         android:layout_height="wrap_content"
         android:visibility="gone"
         tools:visibility="visible"
-        app:constraint_referenced_ids="setting_bg,tv_setting,ll_count,ll_time" />
+        app:constraint_referenced_ids="setting_bg,tv_setting,ll_time" />
 </androidx.constraintlayout.widget.ConstraintLayout>
