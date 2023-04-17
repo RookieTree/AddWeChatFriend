@@ -72,6 +72,8 @@ class AddFriendService : AccessibilityService(), PhoneManager.IAddListener {
     private var tvIndex: TextView? = null
     private var mWindowManager: WindowManager? = null
 
+    private var lastTime: Long = 0
+
     //是否开始添加好友
     var isStartAdd = false
 
@@ -169,8 +171,12 @@ class AddFriendService : AccessibilityService(), PhoneManager.IAddListener {
                 }
                 SEARCH_ERROR_UI -> {
                     if (event.text.contains("用户不存在")) {
-                        dealFailContact()
-                        back()
+                        //防止短时间内进来两次
+                        if (System.currentTimeMillis() - lastTime > 100) {
+                            lastTime = System.currentTimeMillis()
+                            dealFailContact()
+                            back()
+                        }
                     }
                 }
                 CONTACT_USER_UI -> {
