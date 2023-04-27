@@ -9,7 +9,7 @@ permissions:
 
 on:
   pull_request:
-    types: [opened, reopened]
+    types: [opened, reopened, synchronize]
 
 jobs:
   test:
@@ -20,6 +20,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           LANGUAGE: Chinese
-          MODEL:
-            top_p: 1
-            temperature: 1
+          MODEL: gpt-3.5-turbo
+          top_p: 1
+          temperature: 1
