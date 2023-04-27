@@ -1,0 +1,4 @@
+- name: ChatGPT CodeReviewer
+  # You may pin to the exact commit or the version.
+  # uses: anc95/ChatGPT-CodeReview@a245376b017f5a22be59b27af50e2a66c55cf65e
+  uses: anc95/ChatGPT-CodeReview@v1.0.4
