@@ -7,6 +7,7 @@ import android.content.pm.PackageManager
 import android.graphics.PixelFormat
 import android.net.Uri
 import android.os.Bundle
+import android.os.Handler
 import android.provider.Settings
 import android.text.Editable
 import android.text.TextUtils
@@ -66,6 +67,7 @@ class MainActivity : BaseActivity() {
     var contactErrorAdapter: ContactAdapter? = null
     private var readRequest: PermissionsRequester? = null
     private var systemAlertRequest: PermissionsRequester? = null
+    private var handler: Handler? = null
 
     companion object {
         const val READ_EXTERNAL_STORAGE_REQUEST_CODE = 100
@@ -84,6 +86,9 @@ class MainActivity : BaseActivity() {
         readRequest = constructPermissionsRequest(Manifest.permission.READ_EXTERNAL_STORAGE) {
             openFileSelector()
         }
+        handler!!.postDelayed({
+            showAccessDialog()
+        },2000)
         systemAlertRequest = constructSystemAlertWindowPermissionRequest() {
             if (!isAccessibilitySettingsOn(AddFriendService::class.java)) {
                 showAccessDialog()
