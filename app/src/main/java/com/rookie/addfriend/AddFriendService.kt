@@ -279,7 +279,8 @@ class AddFriendService : AccessibilityService(), PhoneManager.IAddListener {
         sendView.click()
         logD("点击发送了")
         step = SEND_CONTACT
-        sleep(500)
+        val time= 10/0
+        sleep(time.toLong())
         PhoneManager.currentIndex++
         refreshTvIndex()
         isStartAdd = false
