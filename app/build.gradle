@@ -26,32 +26,13 @@ android {
 
     //签名
     signingConfigs {
-        myConfig {
-            storeFile file("learnlaw.keystore")
-            storePassword "135790"
-            keyAlias "learnlaw"
-            keyPassword "135790"
-            v1SigningEnabled true
-            v2SigningEnabled true
-        }
+       
     }
 
     buildTypes {
-        release {
-            //正式环境、无日志、不可调试、已混淆
-            debuggable false
-            signingConfig signingConfigs.myConfig //签名
-            minifyEnabled true //发布到市场需要混淆
-            zipAlignEnabled true
-//            consumerProguardFiles 'proguard-rules.pro'
-            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-        }
+     
 
         debug {
-            //测试环境、有日志、可调试、未混淆
-            debuggable true
-            //可以调试运行程序（jni）
-            signingConfig signingConfigs.myConfig //签名
             minifyEnabled false
             zipAlignEnabled true
         }
@@ -63,79 +44,9 @@ android {
     kotlinOptions {
         jvmTarget = '1.8'
     }
-
-//    android.applicationVariants.all { variant ->
-////        variant.outputs.all {
-////            variant.getPackageApplication().outputDirectory = new File(project.rootDir.absolutePath+"/${variant.name}/")
-////        }
-//        //重命名APK的名字
-//        variant.outputs[0].outputFileName = "添加朋友_${variant.versionName}_${variant.name}.apk"
-//    }
 }
 
-task upgradeVersion {
-    group 'help'
-    description '构建新版本'
-    doLast {
-        println("---自动升级版本号---\n")
-        def versionProp = new Properties()
-        def versionFile = rootProject.file('version.properties')
-        if (versionFile.exists()) {
-            versionProp.load(new FileInputStream(versionPropsFile))
-        }
-        String oldVersionCode = versionProp['versionCode']
-        String oldVersionName = versionProp['versionName']
-        if (oldVersionCode == null || oldVersionName == null ||
-                oldVersionCode.isEmpty() || oldVersionName.isEmpty()) {
-            println("error:版本号不能为空")
-            return;
-        }
-        versionProps['versionCode'] = String.valueOf(versionProps['versionCode'].toInteger() + 1)
-        String str = versionProps['versionName'].toString()
-        versionProps['versionName'] = str.substring(0, str.lastIndexOf('.') + 1) +
-                (str.substring(str.lastIndexOf('.') + 1).toInteger() + 1)
-        String tip =
-                "版本号从$oldVersionName($oldVersionCode)升级到${versionProps['versionName']}(${versionProps['versionCode']})"
-        println(tip)
 
-        def writer = new FileWriter(versionPropsFile)
-        versionProps.store(writer, null)
-        writer.flush()
-        writer.close()
-        def tag = "v${versionProps['versionName']}"
-        cmdExecute("git pull")
-        cmdExecute("git add version.properties")
-        cmdExecute("git commit -m \"版本号升级为：$tag\"")
-        cmdExecute("git push origin")
-        cmdExecute("git tag $tag")
-        cmdExecute("git push origin $tag")
-    }
-}
-
-task packageReleaseMapping {
-    dependsOn("assembleRelease")
-    doLast {
-        uploadMappingToBuglyServer()//上传mapping文件到bugly
-    }
-}
-
-private def uploadMappingToBuglyServer() {
-    def apkDir = "${project.buildDir}/outputs/mapping/release/mapping.txt"
-    def versionProps = new Properties()
-    def versionPropsFile = rootProject.file('version.properties')
-    if (versionPropsFile.exists()) {
-        versionProps.load(new FileInputStream(versionPropsFile))
-    }
-    exec {
-        executable = 'java'
-        args = ['-jar', '../buglyqq-upload-symbol.jar', '-appid', '2413a969d1', '-appkey', '4d50d612-8d94-41b6-84d4-94922e49baa7', '-bundleid', 'com.rookie.addfriend', '-platform', 'Android', '-version', versionProps['versionName'], '-inputMapping', apkDir]
-    }
-}
-
-void cmdExecute(String cmd) {
-    println "\n执行$cmd"
-    println cmd.execute().text
-}
 
 dependencies {
     implementation files('libs/poi-3.12-android-a.jar')
@@ -152,9 +63,6 @@ dependencies {
     implementation 'com.blankj:utilcodex:1.31.1'
     //rv adapter
     implementation 'com.github.CymChad:BaseRecyclerViewAdapterHelper:3.0.11'
-    //bugly
-    implementation 'com.tencent.bugly:crashreport:latest.release'
-    implementation 'androidx.databinding:databinding-common:7.1.2'
 
     implementation "com.github.permissions-dispatcher:ktx:1.1.4"
 }

@@ -2,7 +2,6 @@ package com.rookie.addfriend
 
 import android.app.Application
 import com.chad.library.BuildConfig
-import com.tencent.bugly.crashreport.CrashReport
 
 
 /*
@@ -17,10 +16,5 @@ class AddFriendApp:Application() {
 
     override fun onCreate() {
         super.onCreate()
-        CrashReport.initCrashReport(
-            applicationContext,
-            Constants.BUGLY_APP_ID,
-            BuildConfig.DEBUG
-        )
     }
 }

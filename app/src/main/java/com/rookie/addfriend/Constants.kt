@@ -11,8 +11,5 @@ package com.rookie.addfriend
  */
 class Constants {
 
-    companion object {
-        val BUGLY_APP_ID="2413a969d1"
 
-    }
 }
